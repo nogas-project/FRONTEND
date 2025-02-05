@@ -59,13 +59,14 @@
 .ctas {
   display: flex;
   gap: 16px;
+  margin-left: 32px;
 }
 
 .ctas a {
   appearance: none;
   border-radius: 128px;
   height: 48px;
-  padding: 0 20px;
+  padding: 0 32px;
   border: none;
   border: 1px solid transparent;
   transition:
@@ -99,13 +100,9 @@ a.secondary {
 }
 
 .footer a {
-  display: flex;
+  margin-left: 6px;
   align-items: center;
   gap: 8px;
-}
-
-.footer img {
-  flex-shrink: 0;
 }
 
 /* Enable hover only on non-touch devices */
@@ -141,13 +138,7 @@ a.secondary {
   }
 
   .ctas {
-    flex-direction: column;
-  }
-
-  .ctas a {
-    font-size: 14px;
-    height: 40px;
-    padding: 0 16px;
+    margin-left: 12px;
   }
 
   a.secondary {
