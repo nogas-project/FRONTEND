@@ -12,17 +12,14 @@ export default function Register() {
     const [showMinus, setShowMinus] = useState(false)
     // For emergency contacts, we need a minimum of 1, and max of 3
     // frontend button to expand and lower the amount
-    function handleListDisplay() {
-        switch (contacts.length) {
-            case 1:
-                setContacts([...contacts, {'id': contacts.length + 1, 'name': 'Name', 'phone' : 'Number'}])
-                break;
-            case 2:
-                setContacts([...contacts, {'id': contacts.length + 1, 'name': 'Name', 'phone' : 'Number'}])
-                break;
-        }
+    function handleAdd() {
+        setContacts([...contacts, {'id': contacts.length + 1, 'name': 'Name', 'phone' : 'Number'}])
     }
-
+    const handleDelete = (index: number) => {
+        setContacts(oldValues => {
+            return oldValues.filter((_, i) => i !== index)
+        })
+    }
     useEffect(() => {
         switch (contacts.length) {
             case 1:
@@ -40,11 +37,7 @@ export default function Register() {
         }
     }, [contacts])
 
-    const deleteByIndex = (index: number) => {
-        setContacts(oldValues => {
-            return oldValues.filter((_, i) => i !== index)
-        })
-    }
+
 
     return (
         <div className={styles.page}>
@@ -89,16 +82,15 @@ export default function Register() {
 
                             <div>
                                 {showPlus ?
-                                    <button
-                                        className={styles.button}
-                                        onClick={handleListDisplay}
-                                    >
-                                        + </button> : null}
+                                    <p className={styles.button}
+                                        onClick={handleAdd}
+                                        >
+                                        + </p> : null}
                                 {showMinus ?
-                                    <button className={styles.button}
-                                            onClick={() => deleteByIndex(contacts.length - 1)}
-                                >
-                                    - </button> : null}
+                                    <p className={styles.button}
+                                        onClick={() => handleDelete(contacts.length - 1)}
+                                        >
+                                        - </p> : null}
                             </div>
                         </li>
                     </ol>

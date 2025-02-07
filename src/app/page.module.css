@@ -105,6 +105,10 @@ a.secondary {
   gap: 8px;
 }
 
+.logo {
+  align-self: center;
+}
+
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   a.primary:hover {

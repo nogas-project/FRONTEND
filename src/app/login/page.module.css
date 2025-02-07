@@ -113,7 +113,9 @@ a.secondary {
 }
 
 .input {
-  border: 1px solid var(--gray-alpha-100);
+  border: 1px solid grey;
+  border-radius: 6px;
+  padding-left: 4px;
 }
 
 .title {
