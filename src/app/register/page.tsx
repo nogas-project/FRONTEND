@@ -1,23 +1,20 @@
 'use client';
 import Form from "next/form";
-import {ChangeEvent, FormEvent, useEffect, useState} from "react";
+import {FormEvent, useEffect, useState} from "react";
 import styles from "./page.module.css";
+import {useRouter} from "next/navigation";
 
 export default function Register() {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Fetch
-    //
-    // fetch(`http://127.0.0.1:${process.env.BE_PORT}/user/register`, {method: "POST"})
-    // .then(req => req.body)
-
-    // Handle input data
+    // Input data
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [phone, setPhone] = useState("");
-    // Placeholder values for emergency contacts
     const [contacts, setContacts] = useState(
         [{'id': 1, 'name': '', 'phone' : ''}]
     )
@@ -25,6 +22,8 @@ export default function Register() {
     // Handle input verification
     const phoneRegex : RegExp = /^\d{3}-\d{3}-\d{4}$/;
     const emailRegex : RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const [firstNameError, setFirstNameError] = useState("");
+    const [lastNameError, setLastNameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneError, setPhoneError] = useState("");
@@ -32,37 +31,120 @@ export default function Register() {
     const [contactsError, setContactsError] = useState("");
     const [contactsNameError, setContactsNameError] = useState("");
     const [contactsPhoneError, setContactsPhoneError] = useState("");
-    async function handleSubmit(e : FormEvent<HTMLFormElement>) {
+
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        // Better practice would be to autocorrect it for the client
-        phoneRegex.test(phone) ? setPhoneError("") : setPhoneError("Your phone number should look like this: 555-555-5555") ;
-        emailRegex.test(email) ? setEmailError("") : setEmailError("Your email should look like this: example@email.com")
+        let isValid = true;
+
+        if (!firstName) {
+            isValid = false;
+            setFirstNameError("You need to enter your first name");
+        } else {
+            setFirstNameError("");
+        }
+
+        if (!lastName) {
+            isValid = false;
+            setLastNameError("You need to enter your last name");
+        } else {
+            setLastNameError("");
+        }
+
+        if (!emailRegex.test(email)) {
+            isValid = false;
+            setEmailError("Your email should look like this: example@email.com");
+        } else {
+            setEmailError("");
+        }
+
+        if (!phoneRegex.test(phone)) {
+            isValid = false;
+            setPhoneError("Your phone number should look like this: 555-555-5555");
+        } else {
+            setPhoneError("");
+        }
+
+        if (password.length < 8) {
+            isValid = false;
+            setPasswordError("Your password must be at least 8 characters");
+        } else {
+            setPasswordError("");
+        }
+
+        if (confirmPassword !== password) {
+            isValid = false;
+            setConfirmPasswordError("Your password doesn't match");
+        } else {
+            setConfirmPasswordError("");
+        }
 
         // Checks if there's at least one emergency contact, if they all have names,
         // and if they all have proper phone numbers
         let hasInvalidPhone = false;
         let hasInvalidName = false;
-        !contacts[0].name && !contacts[0].phone ? setContactsError("Make sure to have at least one emergency contact") : setContactsError("");
+        if (!contacts[0].name && !contacts[0].phone) {
+            setContactsError("Make sure to have at least one emergency contact")
+            isValid = false;
+        } else {
+            setContactsError("");
+        }
         for (let i = 0; i < contacts.length; i++) {
             if (!contacts[i].name) {
+                isValid = false;
                 hasInvalidName = true;
                 break;
-            } else {
             }
-
             if (!phoneRegex.test(contacts[i].phone)) {
+                isValid = false;
                 hasInvalidPhone = true;
                 break;
-            } else {
-                setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555");
             }
         }
         hasInvalidName ? setContactsNameError("One of your contacts' name is missing") : setContactsNameError("");
         hasInvalidPhone ? setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555") : setContactsPhoneError("");
 
-        // Password checks, could add more
-        password.length < 6 ? setPasswordError("Your password must be at least 8 characters") : setPasswordError("");
-        confirmPassword !== password ? setConfirmPasswordError("Your password doesn't match") : setConfirmPasswordError("");
+        if (!isValid) {
+            console.log("Validation failed. Please fix the errors.");
+            return;
+        }
+
+        // Prepare data, contacts to be done separately
+        const data = {
+            firstName,
+            lastName,
+            email,
+            password,
+            phone,
+        };
+
+        // Send data to BE using fetch
+        let port = process.env.BE_PORT || 3001;
+        setIsLoading(true);
+        try {
+            console.log("Trying to reach BE...")
+            const response = await fetch(`http://localhost:${port}/user/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            // Need to differ between BE being down or account existing
+            if (!response.ok) {
+                setIsLoading(false);
+                setEmailError("An account with this email already exists, please use another email");
+                throw new Error("BE is down or account with email already exists");
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+
+            // Send to login page
+            router.push('/login');
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     // For emergency contacts, we need a minimum of 1, and max of 3
@@ -80,7 +162,6 @@ export default function Register() {
 
     // Render each time contacts is changed to accurately show + and -
     useEffect(() => {
-        console.log(contacts)
         switch (contacts.length) {
             case 1:
                 setShowPlus(true)
@@ -101,36 +182,55 @@ export default function Register() {
         <div className={styles.page}>
             <main className={styles.main}>
                 <p className={styles.title}>== SIGN UP ==</p>
-                <Form action="/">
+                <Form onSubmit={handleSubmit} action={"/"}>
                     <ol>
                         <li>
                             First Name:
-                            <input onChange={(e) => {setFirstName(e.target.value)}} className={styles.input} type="text"
+                            <input onChange={(e) => {setFirstName(e.target.value)}}
+                                   className={styles.input}
+                                   type="text"
                                    placeholder="First Name"/>
+                            <ol>{firstNameError}</ol>
                         </li>
                         <li>
                             Last Name:
-                            <input onChange={(e) => {setLastName(e.target.value)}} className={styles.input} type="text" placeholder="Last Name"/>
+                            <input onChange={(e) => {setLastName(e.target.value)}}
+                                   className={styles.input}
+                                   type="text"
+                                   placeholder="Last Name"/>
+                            <ol>{lastNameError}</ol>
                         </li>
                         <li>
                             Email:
-                            <input onChange={(e) => {setEmail(e.target.value)}} className={styles.input} type="text" placeholder="Email"/>
+                            <input onChange={(e) => {setEmail(e.target.value)}}
+                                   className={styles.input}
+                                   type="text"
+                                   placeholder="Email"/>
                             <ol>{emailError}</ol>
                         </li>
                         <li>
                             Password:
-                            <input onChange={(e) => {setPassword(e.target.value)}} className={styles.input} type="password" placeholder="Password"/>
+                            <input onChange={(e) => {setPassword(e.target.value)}}
+                                   className={styles.input}
+                                   type="password"
+                                   placeholder="Password"/>
                             <ol>{passwordError}</ol>
                         </li>
                         <li>
                             Confirm Password:
-                            <input onChange={(e) => {setConfirmPassword(e.target.value)}} className={styles.input} type="password" placeholder="Password"/>
+                            <input onChange={(e) => {setConfirmPassword(e.target.value)}}
+                                   className={styles.input}
+                                   type="password"
+                                   placeholder="Password"/>
                             <ol>{confirmPasswordError}</ol>
 
                         </li>
                         <li>
                             Phone:
-                            <input onChange={(e) => {setPhone(e.target.value)}} className={styles.input} type="text" placeholder="Number"/>
+                            <input onChange={(e) => {setPhone(e.target.value)}}
+                                   className={styles.input}
+                                   type="text"
+                                   placeholder="Number"/>
                             <ol>{phoneError}</ol>
                         </li>
                         <li>
@@ -139,20 +239,28 @@ export default function Register() {
                                 <div key={contact.id}>
                                     <ul>
                                         <li>
-                                            <input onChange={(e) => {contact.name = e.target.value}} className={styles.input} type="text" placeholder="Name"/>
+                                            <input onChange={(e) => {contact.name = e.target.value}}
+                                                   className={styles.input}
+                                                   type="text"
+                                                   placeholder="Name"/>
                                         </li>
                                         <li>
-                                            <input onChange={(e) => {contact.phone = e.target.value}} className={styles.inputb} type="text" placeholder="Phone"/>
+                                            <input onChange={(e) => {contact.phone = e.target.value}}
+                                                   className={styles.inputb}
+                                                   type="text"
+                                                   placeholder="Phone"/>
                                         </li>
                                     </ul>
                                 </div>
                             ))}
+                            {/* Contacts errors */}
                             <ol>
                                 <li>{contactsError}</li>
                                 <li>{contactsNameError}</li>
                                 <li>{contactsPhoneError}</li>
                             </ol>
 
+                            {/* + and - buttons */}
                             <div>
                                 {showPlus ?
                                     <p className={styles.button}
@@ -169,10 +277,16 @@ export default function Register() {
                     </ol>
 
                     <div className={'text-center'}>
-                        <button className={styles.submit} type='submit' onClick={handleSubmit}>[ Submit ]</button>
+                        <button className={styles.submit} type='submit'>[ Submit ]</button>
                     </div>
-
                 </Form>
+
+                {/* Loading overlay when reaching to BE, spinner would be nicer */}
+                {isLoading && (
+                    <div className={styles.overlay}>
+                        <div className={styles.loadingText}>Loading...</div>
+                    </div>
+                )}
             </main>
 
         </div>
