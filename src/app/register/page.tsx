@@ -6,12 +6,9 @@ import styles from "./page.module.css";
 export default function Register() {
 
     // Fetch
-
+    //
     // fetch(`http://127.0.0.1:${process.env.BE_PORT}/user/register`, {method: "POST"})
     // .then(req => req.body)
-
-
-    ///
 
     // Handle input data
     const [firstName, setFirstName] = useState("");
@@ -20,51 +17,68 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [phone, setPhone] = useState("");
+    // Placeholder values for emergency contacts
+    const [contacts, setContacts] = useState(
+        [{'id': 1, 'name': '', 'phone' : ''}]
+    )
 
-    // const handleFirstName = (e : ChangeEvent | any) =>  {
-    //     setFirstName(e.currentTarget.value);
-    // }
-    // const handleLastName = (e : ChangeEvent | any) =>  {
-    //     setLastName(e.currentTarget.value);
-    // }
-    // const handleEmail = (e : ChangeEvent | any) =>  {
-    //     setEmail(e.currentTarget.value);
-    // }
-    // const handlePassword = (e : ChangeEvent | any) =>  {
-    //     setPassword(e.currentTarget.value);
-    // }
-    // const handleConfirmPassword = (e : ChangeEvent | any) =>  {
-    //     setConfirmPassword(e.currentTarget.value);
-    // }
-    // const handlePhone = (e : ChangeEvent | any) =>  {
-    //     setPhone(e.currentTarget.value);
-    // }
-
+    // Handle input verification
+    const phoneRegex : RegExp = /^\d{3}-\d{3}-\d{4}$/;
+    const emailRegex : RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
-    async function handleSubmit(e : FormEvent<HTMLFormElement>){
+    const [phoneError, setPhoneError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [contactsError, setContactsError] = useState("");
+    const [contactsNameError, setContactsNameError] = useState("");
+    const [contactsPhoneError, setContactsPhoneError] = useState("");
+    async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        // Better practice would be to autocorrect it for the client
+        phoneRegex.test(phone) ? setPhoneError("") : setPhoneError("Your phone number should look like this: 555-555-5555") ;
+        emailRegex.test(email) ? setEmailError("") : setEmailError("Your email should look like this: example@email.com")
 
-        password.length < 6 ? setPasswordError("Your password is too short!") : setPasswordError("");
-        confirmPassword !== password ? setConfirmPasswordError("Password doesn't match!") : setConfirmPasswordError("");
+        // Checks if there's at least one emergency contact, if they all have names,
+        // and if they all have proper phone numbers
+        let hasInvalidPhone = false;
+        let hasInvalidName = false;
+        !contacts[0].name && !contacts[0].phone ? setContactsError("Make sure to have at least one emergency contact") : setContactsError("");
+        for (let i = 0; i < contacts.length; i++) {
+            if (!contacts[i].name) {
+                hasInvalidName = true;
+                break;
+            } else {
+            }
 
+            if (!phoneRegex.test(contacts[i].phone)) {
+                hasInvalidPhone = true;
+                break;
+            } else {
+                setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555");
+            }
+        }
+        hasInvalidName ? setContactsNameError("One of your contacts' name is missing") : setContactsNameError("");
+        hasInvalidPhone ? setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555") : setContactsPhoneError("");
+
+        // Password checks, could add more
+        password.length < 6 ? setPasswordError("Your password must be at least 8 characters") : setPasswordError("");
+        confirmPassword !== password ? setConfirmPasswordError("Your password doesn't match") : setConfirmPasswordError("");
     }
 
-    const [contacts, setContacts] = useState(
-        [{'id': 1, 'name': 'Name', 'phone' : 'Number'}]
-    )
-    const [showPlus, setShowPlus] = useState(true)
-    const [showMinus, setShowMinus] = useState(false)
     // For emergency contacts, we need a minimum of 1, and max of 3
     // these functions handle when to show the buttons to add or remove them
+    const [showPlus, setShowPlus] = useState(true)
+    const [showMinus, setShowMinus] = useState(false)
     function handleAdd() {
-        setContacts([...contacts, {'id': contacts.length + 1, 'name': 'Name', 'phone' : 'Number'}])
+        setContacts([...contacts, {'id': contacts.length + 1, 'name': '', 'phone' : ''}])
     }
     const handleDelete = (index: number) => {
         setContacts(oldValues => {
             return oldValues.filter((_, i) => i !== index)
         })
     }
+
+    // Render each time contacts is changed to accurately show + and -
     useEffect(() => {
         console.log(contacts)
         switch (contacts.length) {
@@ -101,6 +115,7 @@ export default function Register() {
                         <li>
                             Email:
                             <input onChange={(e) => {setEmail(e.target.value)}} className={styles.input} type="text" placeholder="Email"/>
+                            <ol>{emailError}</ol>
                         </li>
                         <li>
                             Password:
@@ -116,6 +131,7 @@ export default function Register() {
                         <li>
                             Phone:
                             <input onChange={(e) => {setPhone(e.target.value)}} className={styles.input} type="text" placeholder="Number"/>
+                            <ol>{phoneError}</ol>
                         </li>
                         <li>
                             Emergency Contacts:
@@ -123,14 +139,19 @@ export default function Register() {
                                 <div key={contact.id}>
                                     <ul>
                                         <li>
-                                            <input onChange={(e) => {contact.name = e.target.value}} className={styles.input} type="text" placeholder={contact.name}/>
+                                            <input onChange={(e) => {contact.name = e.target.value}} className={styles.input} type="text" placeholder="Name"/>
                                         </li>
                                         <li>
-                                            <input onChange={(e) => {contact.phone = e.target.value}} className={styles.inputb} type="text" placeholder={contact.phone}/>
+                                            <input onChange={(e) => {contact.phone = e.target.value}} className={styles.inputb} type="text" placeholder="Phone"/>
                                         </li>
                                     </ul>
                                 </div>
                             ))}
+                            <ol>
+                                <li>{contactsError}</li>
+                                <li>{contactsNameError}</li>
+                                <li>{contactsPhoneError}</li>
+                            </ol>
 
                             <div>
                                 {showPlus ?
