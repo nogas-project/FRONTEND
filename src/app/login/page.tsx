@@ -56,9 +56,7 @@ export default function Login() {
             if (!response.ok) {
                 // setIsLoading(false);
                 let feedback = await response.json()
-                console.log("response is", feedback)
-
-                if (feedback === "bad") {
+                if (feedback === "Invalid credentials") {
                     setCredentialsError("Incorrect credentials");
                     throw new Error("Bad credentials");
                 } else {
@@ -84,6 +82,7 @@ export default function Login() {
                 <Form onSubmit={handleSubmit} action="/" className={styles.login}>
                     <p className={styles.title}>== LOGIN ==</p>
                     <ol>
+                        <li>{credentialsError}</li>
                         <li>
                             Email:
                             <input onChange={(e) => setEmail(e.target.value)}
