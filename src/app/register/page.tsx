@@ -31,6 +31,7 @@ export default function Register() {
     const [contactsError, setContactsError] = useState("");
     const [contactsNameError, setContactsNameError] = useState("");
     const [contactsPhoneError, setContactsPhoneError] = useState("");
+    const [serverError, setServerError] = useState("");
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -138,11 +139,17 @@ export default function Register() {
                 body: JSON.stringify(data),
             });
 
-            // todo: Need to differ between BE being down or account existing
             if (!response.ok) {
                 setIsLoading(false);
-                setEmailError("An account with this email already exists, please use another email");
-                throw new Error("BE is down or account with email already exists");
+                let feedback = await response.json()
+                if (feedback === "Email already exists") {
+                    console.log("entered responeif")
+                    setEmailError("An account with this email already exists, please use another email");
+                    throw new Error("Email exists")
+                } else {
+                    console.log("entered else")
+                    throw new Error("BE is down");
+                }
             }
 
             const result = await response.json();
@@ -164,7 +171,6 @@ export default function Register() {
                 if (!contactResponse.ok) {
                     throw new Error("Couldn't add contact");
                 }
-
                 console.log('Success:', contactResponse);
             }
 
@@ -172,9 +178,10 @@ export default function Register() {
             router.push('/login');
 
         } catch (error) {
+            setIsLoading(false);
+            setServerError("There's a problem on our end. Sorry, try again later");
             console.error('Error:', error);
         }
-
 
     }
 
@@ -214,7 +221,9 @@ export default function Register() {
             <main className={styles.main}>
                 <p className={styles.title}>== SIGN UP ==</p>
                 <Form onSubmit={handleSubmit} action={"/"}>
+
                     <ol>
+                        <li className={"text-red-500"}>{serverError}</li>
                         <li>
                             First Name:
                             <input onChange={(e) => {setFirstName(e.target.value)}}
