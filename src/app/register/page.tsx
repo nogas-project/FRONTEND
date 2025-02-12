@@ -108,7 +108,7 @@ export default function Register() {
             return;
         }
 
-        // Prepare data, contacts to be done separately
+        // Prepare data
         const data = {
             firstName,
             lastName,
@@ -116,6 +116,14 @@ export default function Register() {
             password,
             phone,
         };
+
+        // Contacts are done separately because of the oneToMany
+        // relation done in the backend.
+        // this revision takes in mind that the backend returns the id
+        // of the user in the POST response.
+        const contactData = {
+            contacts,
+        }
 
         // Send data to BE using fetch
         let port = process.env.BE_PORT || 3001;
@@ -130,7 +138,7 @@ export default function Register() {
                 body: JSON.stringify(data),
             });
 
-            // Need to differ between BE being down or account existing
+            // todo: Need to differ between BE being down or account existing
             if (!response.ok) {
                 setIsLoading(false);
                 setEmailError("An account with this email already exists, please use another email");
@@ -138,13 +146,36 @@ export default function Register() {
             }
 
             const result = await response.json();
+            console.log(result);
             console.log('Success:', result);
+
+            // Proceed and add emergency contacts
+            // todo: once backend is revised, either slice out the id or keep it, leaning on keeping it for mapping
+            for (let i = 0; i < contacts.length; i++) {
+                console.log(contactData.contacts[i])
+                const contactResponse = await fetch(`http://localhost:${port}/contacts/${result}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(contactData.contacts[i]),
+                });
+
+                if (!contactResponse.ok) {
+                    throw new Error("Couldn't add contact");
+                }
+
+                console.log('Success:', contactResponse);
+            }
 
             // Send to login page
             router.push('/login');
+
         } catch (error) {
             console.error('Error:', error);
         }
+
+
     }
 
     // For emergency contacts, we need a minimum of 1, and max of 3
