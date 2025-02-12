@@ -37,8 +37,6 @@ export default function Register() {
         }
     }, [contacts])
 
-
-
     return (
         <div className={styles.page}>
             <main className={styles.main}>
