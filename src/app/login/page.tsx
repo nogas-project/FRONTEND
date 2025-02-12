@@ -55,17 +55,13 @@ export default function Login() {
 
             if (!response.ok) {
                 // setIsLoading(false);
-                let feedback = await response.json()
-                if (feedback === "Invalid credentials") {
-                    setCredentialsError("Incorrect credentials");
-                    throw new Error("Bad credentials");
-                } else {
-                    throw new Error("Something went wrong");
-                }
+                setCredentialsError("Incorrect credentials");
+                throw new Error("Bad credentials");
+            } else {
+                setCredentialsError("Logging in...");
             }
 
             const result = await response.json();
-            console.log(result);
             console.log('Success:', result);
 
         } catch (error) {
