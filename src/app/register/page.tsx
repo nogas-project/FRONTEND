@@ -157,7 +157,6 @@ export default function Register() {
             console.log('Success:', result);
 
             // Proceed and add emergency contacts
-            // todo: once backend is revised, either slice out the id or keep it, leaning on keeping it for mapping
             for (let i = 0; i < contacts.length; i++) {
                 console.log(contactData.contacts[i])
                 const contactResponse = await fetch(`http://localhost:${port}/contacts/${result}`, {
