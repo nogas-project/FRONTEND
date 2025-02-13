@@ -111,8 +111,8 @@ export default function Register() {
 
         // Prepare data
         const data = {
-            firstName,
-            lastName,
+            first_name : firstName,
+            last_name : lastName,
             email,
             password,
             phone,
