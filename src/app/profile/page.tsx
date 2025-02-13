@@ -3,6 +3,7 @@ import styles from "./page.module.css"
 import {FormEvent, useState} from "react";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
+import {userInfo} from "node:os";
 
 export default function Profile() {
 
@@ -10,34 +11,73 @@ export default function Profile() {
     /* todo : this will be a protected route requiring authentication */
     const [isEditing, setIsEditing] = useState(false)
 
-    const [firstName, setFirstName] = useState("joe")
-    const [lastName, setLastName] = useState("doe")
-    const [email, setEmail] = useState("joe@doe.com")
-    const [phone, setPhone] = useState("514-415-5555")
-    const [password, setPassword] = useState("abcd-1234")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
-    async function loadData() {
+    async function loadProfileData() {
         const token = document.cookie
             .split("; ")
             .find((row) => row.startsWith("token"))
             ?.split("=")[1];
-        
+
         if (token) {
             const decoded = jwtDecode(token);
-            console.log("token", decoded);
+            const userId : number = decoded.id
+
+            const response = await fetch(`http://localhost:3001/user/${userId}`, {
+                method: "GET",
+                headers: {
+                    contentType: "application/json",
+                    authorization: `Bearer ${token}`,
+                },
+            })
+            const data = await response.json();
+            if (data) {
+                return data;
+            }
         }
-
     }
-    loadData()
+    loadProfileData().then(data => {
+        setFirstName(data.first_name)
+        setLastName(data.last_name)
+        setEmail(data.email)
+        setPhone(data.phone)
+    })
 
-    const profileData = {
-        first_name : firstName,
-        last_name : lastName,
-        email : email,
-        phone : phone,
-        password: password,
+    async function loadContactsData() {
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("token"))
+            ?.split("=")[1];
+
+        if (token) {
+            const decoded = jwtDecode(token);
+            const userId : number = decoded.id
+
+            try {
+                const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        contentType: "application/json",
+                        authorization: `Bearer ${token}`,
+                    },
+                })
+                const data = await response.json();
+                if (data) {
+                    return data;
+                }
+            } catch (error) {
+                throw error
+            }
+        }
     }
+    loadContactsData().then(data => {
+        setContacts(data)
+    })
 
     // Contacts are obtained via a different route, using the userId
     const [contacts, setContacts] = useState(
@@ -134,20 +174,27 @@ export default function Profile() {
             return;
         }
 
-        const port = process.env.BE_PORT || 3001;
-        try {
-
-            const response = await fetch(`http://localhost:${port}/contacts/userid`, {
-                method: "PUT",
-                headers: {
-                    ContentType: "application/json",
-                },
-                body: JSON.stringify(profileData)
-            })
-
-        } catch (error) {
-
-        }
+        // Everything is valid, send PUT
+        // const port = process.env.BE_PORT || 3001;
+        // try {
+        //     const response = await fetch(`http://localhost:${port}/contacts/userid`, {
+        //         method: "PUT",
+        //         headers: {
+        //             ContentType: "application/json",
+        //         },
+        //         body: JSON.stringify(profileData)
+        //     })
+        //
+        //     if (!response.ok) {
+        //         throw response;
+        //     }
+        //
+        //     const data = await response.json();
+        //     console.log(data);
+        //
+        // } catch (error) {
+        //     throw error
+        // }
 
         setIsEditing(!isEditing)
         console.log(contacts)
@@ -172,22 +219,22 @@ export default function Profile() {
                         <ol>
                             <li className={styles.heading}>Your email:</li>
                             <input
-                                placeholder={profileData.email}
-                                onChange={e => setEmail(e.target.value)}/>
+                                placeholder={email}
+                                onChange={(e) => setEmail(e.target.value)}/>
                             <li>{emailError}</li>
                             <li className={styles.heading}>Your first name:</li>
                             <input
-                                placeholder={profileData.first_name}
-                                onChange={e => setFirstName(e.target.value)}/>
+                                placeholder={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}/>
                             <li>{firstNameError}</li>
                             <li className={styles.heading}>Your last name:</li>
                             <input
-                                placeholder={profileData.last_name}
+                                placeholder={lastName}
                                 onChange={e => setLastName(e.target.value)}/>
                             <li>{lastNameError}</li>
                             <li className={styles.heading}>Your phone number:</li>
                             <input
-                                placeholder={profileData.phone}
+                                placeholder={phone}
                                 onChange={e => setPhone(e.target.value)}/>
                             <li>{phoneError}</li>
                             <li className={styles.heading}>Your password:</li>
@@ -226,13 +273,13 @@ export default function Profile() {
                     <div>
                         <ol>
                             <li className={styles.heading}>Your email:</li>
-                            <li>{profileData.email}</li>
+                            <li>{email}</li>
                             <li className={styles.heading}>Your first name:</li>
-                            <li>{profileData.first_name}</li>
+                            <li>{firstName}</li>
                             <li className={styles.heading}>Your last name:</li>
-                            <li>{profileData.last_name}</li>
+                            <li>{lastName}</li>
                             <li className={styles.heading}>Your phone number:</li>
-                            <li>{profileData.phone}</li>
+                            <li>{phone}</li>
                             <li className={styles.heading}>Your password:</li>
                             <li>********</li>
                             <li className={styles.heading}>Your emergency contacts:</li>
