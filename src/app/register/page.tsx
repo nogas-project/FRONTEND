@@ -143,23 +143,20 @@ export default function Register() {
                 setIsLoading(false);
                 let feedback = await response.json()
                 if (feedback === "Email already exists") {
-                    console.log("entered responeif")
                     setEmailError("An account with this email already exists, please use another email");
                     throw new Error("Email exists")
                 } else {
-                    console.log("entered else")
                     throw new Error("BE is down");
                 }
             }
 
             const result = await response.json();
-            console.log(result);
-            console.log('Success:', result);
+            console.log('Success:', result.mess);
 
             // Proceed and add emergency contacts
             for (let i = 0; i < contacts.length; i++) {
                 console.log(contactData.contacts[i])
-                const contactResponse = await fetch(`http://localhost:${port}/contacts/${result}`, {
+                const contactResponse = await fetch(`http://localhost:${port}/contacts/${result.mess}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
