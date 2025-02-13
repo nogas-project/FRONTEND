@@ -2,8 +2,10 @@
 import Form from "next/form";
 import styles from "./page.module.css";
 import {FormEvent, useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
 
 export default function Login() {
+    const router = useRouter();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,6 +14,7 @@ export default function Login() {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [credentialsError, setCredentialsError] = useState("");
+    const [serverError, setServerError] = useState("");
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -45,7 +48,7 @@ export default function Login() {
         const port = process.env.BE_PORT || 3001;
         try {
             console.log(JSON.stringify(data));
-            const response = await fetch('http://localhost:3001/user/login', {
+            const response = await fetch(`http://localhost:${port}/user/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -55,16 +58,23 @@ export default function Login() {
 
             if (!response.ok) {
                 // setIsLoading(false);
+                setServerError("");
                 setCredentialsError("Incorrect credentials");
-                throw new Error("Bad credentials");
+                return;
             } else {
                 setCredentialsError("Logging in...");
             }
 
-            const result = await response.json();
-            console.log('Success:', result);
+
+            const token = await response.json();
+            console.log('Success:', token);
+
+            document.cookie = `token=${token}; path=/`
+            router.push("/home");
 
         } catch (error) {
+            setCredentialsError("")
+            setServerError('Something went wrong on our end, Sorry, try again later');
             console.log(error);
         }
     }
@@ -79,6 +89,7 @@ export default function Login() {
                     <p className={styles.title}>== LOGIN ==</p>
                     <ol>
                         <li>{credentialsError}</li>
+                        <li className={'text-red-500'} >{serverError}</li>
                         <li>
                             Email:
                             <input onChange={(e) => setEmail(e.target.value)}
