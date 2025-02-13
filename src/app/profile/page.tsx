@@ -1,14 +1,13 @@
 "use client"
 import styles from "./page.module.css"
-import {FormEvent, useState} from "react";
+import {useState} from "react";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
-import {userInfo} from "node:os";
 
 export default function Profile() {
 
     // todo : add navbar
-    /* todo : this will be a protected route requiring authentication */
+    // todo : this will be a protected route requiring authentication
     const [isEditing, setIsEditing] = useState(false)
 
     const [firstName, setFirstName] = useState("")
@@ -17,15 +16,27 @@ export default function Profile() {
     const [phone, setPhone] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
+    const [contacts, setContacts] = useState([{"id": 1, "name": "joe", "phone": "514-514-5555"}])
 
-    async function loadProfileData() {
-        const token = document.cookie
+    function getToken() {
+        let token;
+        token = document.cookie
             .split("; ")
             .find((row) => row.startsWith("token"))
             ?.split("=")[1];
 
+        return token
+    }
+
+    async function loadProfileData() {
+        // Get token from cookies
+        const token = getToken();
+        // Get User Info
         if (token) {
             const decoded = jwtDecode(token);
+
+            // Ignoring this because there's no way around it
+            // @ts-ignore
             const userId : number = decoded.id
 
             const response = await fetch(`http://localhost:3001/user/${userId}`, {
@@ -39,6 +50,8 @@ export default function Profile() {
             if (data) {
                 return data;
             }
+        } else {
+            throw new Error("Unable to load profile data.")
         }
     }
     loadProfileData().then(data => {
@@ -49,13 +62,13 @@ export default function Profile() {
     })
 
     async function loadContactsData() {
-        const token = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("token"))
-            ?.split("=")[1];
+        const token = getToken()
 
         if (token) {
             const decoded = jwtDecode(token);
+
+            // Ignoring this because there's no way around it
+            // @ts-ignore
             const userId : number = decoded.id
 
             try {
@@ -79,11 +92,7 @@ export default function Profile() {
         setContacts(data)
     })
 
-    // Contacts are obtained via a different route, using the userId
-    const [contacts, setContacts] = useState(
-        [{'id': 5, 'name': 'the_Devil', 'phone' : '666-666-6666'}, {'id': 7, 'name': 'the_Devil', 'phone' : '666-666-6666'}]
-    )
-
+    // Mostly code from register page from here
     // Handle input verification
     const phoneRegex : RegExp = /^\d{3}-\d{3}-\d{4}$/;
     const emailRegex : RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -98,7 +107,6 @@ export default function Profile() {
     const [contactsPhoneError, setContactsPhoneError] = useState("");
     const [serverError, setServerError] = useState("");
 
-    // Repurposed code from register page
     async function handleSubmit() {
         let isValid = true;
 
