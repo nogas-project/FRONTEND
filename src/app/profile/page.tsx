@@ -1,6 +1,6 @@
 "use client"
 import styles from "./page.module.css"
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
 
@@ -10,6 +10,8 @@ export default function Profile() {
     // todo : this will be a protected route requiring authentication
     const [isEditing, setIsEditing] = useState(false)
 
+    let userId: any;
+    let token: any;
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
@@ -29,15 +31,12 @@ export default function Profile() {
     }
 
     async function loadProfileData() {
-        // Get token from cookies
-        const token = getToken();
-        // Get User Info
+        token = getToken();
         if (token) {
             const decoded = jwtDecode(token);
 
-            // Ignoring this because there's no way around it
             // @ts-ignore
-            const userId : number = decoded.id
+            userId = decoded.id
 
             const response = await fetch(`http://localhost:3001/user/${userId}`, {
                 method: "GET",
@@ -54,43 +53,42 @@ export default function Profile() {
             throw new Error("Unable to load profile data.")
         }
     }
-    loadProfileData().then(data => {
-        setFirstName(data.first_name)
-        setLastName(data.last_name)
-        setEmail(data.email)
-        setPhone(data.phone)
-    })
-
     async function loadContactsData() {
-        const token = getToken()
 
-        if (token) {
-            const decoded = jwtDecode(token);
-
-            // Ignoring this because there's no way around it
-            // @ts-ignore
-            const userId : number = decoded.id
-
-            try {
-                const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
-                    method: "GET",
-                    headers: {
-                        contentType: "application/json",
-                        authorization: `Bearer ${token}`,
-                    },
-                })
-                const data = await response.json();
-                if (data) {
-                    return data;
-                }
-            } catch (error) {
-                throw error
+        console.log("userId", userId);
+        try {
+            const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
+                method: "GET",
+                headers: {
+                    contentType: "application/json",
+                    authorization: `Bearer ${token}`,
+                },
+            })
+            const data = await response.json();
+            if (data) {
+                return data;
             }
+        } catch (error) {
+            throw error
         }
     }
-    loadContactsData().then(data => {
-        setContacts(data)
-    })
+
+    // Use useEffect to load data once when the component mounts
+    useEffect(() => {
+        console.log("loading data")
+        loadProfileData().then(data => {
+            setFirstName(data.first_name);
+            setLastName(data.last_name);
+            setEmail(data.email);
+            setPhone(data.phone);
+            setPassword(data.password);
+            setConfirmPassword(data.password);
+            // Load contacts
+            loadContactsData().then(data => {
+                setContacts(data);
+            });
+        });
+    }, []); // Empty dependency array ensures this runs only once
 
     // Mostly code from register page from here
     // Handle input verification
@@ -182,31 +180,69 @@ export default function Profile() {
             return;
         }
 
+        const profileData = {
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+            email,
+            password
+        }
+
+        const contactData = {
+            contacts,
+        }
+
         // Everything is valid, send PUT
-        // const port = process.env.BE_PORT || 3001;
-        // try {
-        //     const response = await fetch(`http://localhost:${port}/contacts/userid`, {
-        //         method: "PUT",
+        const port = process.env.BE_PORT || 3001;
+        const token : any = getToken();
+        const decoded = jwtDecode(token);
+        // @ts-ignore
+        const userId = decoded.id
+
+        console.log(userId);
+        console.log(JSON.stringify(profileData));
+        try {
+            const response = await fetch(`http://localhost:${port}/user/${userId}`, {
+                method: "PUT",
+                headers: {
+                    ContentType: "application/json",
+                    authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            if (!response.ok) {
+                console.log("Something went wrong")
+                throw response;
+            }
+
+            const data = await response.json();
+            console.log(data);
+
+        } catch (error) {
+            throw error
+        }
+
+        // // Contacts PUT
+        // for (let i = 0; i < contacts.length; i++) {
+        //     console.log(contactData.contacts[i])
+        //     const contactResponse = await fetch(`http://localhost:${port}/contacts/${userId}`, {
+        //         method: 'PUT',
         //         headers: {
-        //             ContentType: "application/json",
+        //             'Content-Type': 'application/json',
+        //             authorization: `Bearer ${token}`,
         //         },
-        //         body: JSON.stringify(profileData)
-        //     })
+        //         body: JSON.stringify(contactData.contacts[i]),
+        //     });
         //
-        //     if (!response.ok) {
-        //         throw response;
+        //     if (!contactResponse.ok) {
+        //         throw new Error("Couldn't add contact");
         //     }
-        //
-        //     const data = await response.json();
-        //     console.log(data);
-        //
-        // } catch (error) {
-        //     throw error
+        //     console.log('Success:', contactResponse);
         // }
 
+        // Exit editing mode
         setIsEditing(!isEditing)
-        console.log(contacts)
-
     }
 
     return (
