@@ -1,13 +1,13 @@
 "use client"
 import styles from "./page.module.css"
 import {useState} from "react";
+import Image from "next/image";
 
 export default function Profile() {
 
     // todo : will use PUT api endpoint
 
-    /* todo : this will be a protected route requiring authentication
-    *   it'll get the userId from the session JWT and show the profile info */
+    /* todo : this will be a protected route requiring authentication */
 
     const [isEditing, setIsEditing] = useState(false)
 
@@ -26,41 +26,55 @@ export default function Profile() {
 
     // Contacts are obtained via a different route, using the userId
     const [contacts, setContacts] = useState(
-        [{'id': 1, 'name': 'the_Devil', 'phone' : '666'}]
+        [{'id': 5, 'name': 'the_Devil', 'phone' : '666'}, {'id': 7, 'name': 'the_Devil', 'phone' : '666'}]
     )
+
+    async function handleSubmit() {
+
+        setIsEditing(!isEditing)
+        console.log(contacts)
+
+    }
 
     return (
         <div className={styles.page}>
             {/* Navbar will go here, it's in-dev with home page branch */}
-            <main className={styles.main}>
-
+            <main className={isEditing ? styles.mainEdit : styles.main}>
+                <Image
+                    className={styles.logo}
+                    src="/fire.svg"
+                    alt="nogas-logo"
+                    width={200}
+                    height={50}
+                    priority
+                />
                 {isEditing ?
                     /* In editing mode */
                     <div>
                         <ol>
-                            <li className={''}>Your email:</li>
+                            <li className={styles.heading}>Your email:</li>
                             <input
                                 placeholder={profileData.email}
                                 onChange={e => setEmail(e.target.value)}/>
-                            <li className={''}>Your first name:</li>
+                            <li className={styles.heading}>Your first name:</li>
                             <input
                                 placeholder={profileData.first_name}
                                 onChange={e => setFirstName(e.target.value)}/>
-                            <li className={''}>Your last name:</li>
+                            <li className={styles.heading}>Your last name:</li>
                             <input
                                 placeholder={profileData.last_name}
                                 onChange={e => setLastName(e.target.value)}/>
-                            <li className={''}>Your phone number:</li>
+                            <li className={styles.heading}>Your phone number:</li>
                             <input
                                 placeholder={profileData.phone}
                                 onChange={e => setPhone(e.target.value)}/>
-                            <li className={''}>Your password:</li>
+                            <li className={styles.heading}>Your password:</li>
                             {/* Pop up to inform the password is changed would be nice */}
                             <input
                                 placeholder="Enter new password"
                                 type="password"
                                 onChange={e => setPassword(e.target.value)}/>
-                            <li className={''}>Your emergency contacts:</li>
+                            <li className={styles.heading}>Your emergency contacts:</li>
                             {contacts.map(contact => (
                                 <div key={contact.id}>
                                     <ul>
@@ -78,17 +92,17 @@ export default function Profile() {
                     /* In normal mode */
                     <div>
                         <ol>
-                            <li className={'font-bold'}>Your email:</li>
+                            <li className={styles.heading}>Your email:</li>
                             <li>{profileData.email}</li>
-                            <li className={'font-bold'}>Your first name:</li>
+                            <li className={styles.heading}>Your first name:</li>
                             <li>{profileData.first_name}</li>
-                            <li className={'font-bold'}>Your last name:</li>
+                            <li className={styles.heading}>Your last name:</li>
                             <li>{profileData.last_name}</li>
-                            <li className={'font-bold'}>Your phone number:</li>
+                            <li className={styles.heading}>Your phone number:</li>
                             <li>{profileData.phone}</li>
-                            <li className={'font-bold'}>Your password:</li>
+                            <li className={styles.heading}>Your password:</li>
                             <li>****</li>
-                            <li className={'font-bold'}>Your emergency contacts:</li>
+                            <li className={styles.heading}>Your emergency contacts:</li>
                             <li>
                                 {contacts.map(contact => (
                                     <div key={contact.id}>
@@ -102,8 +116,11 @@ export default function Profile() {
                         </ol>
                     </div>
                 }
-                <a className={'text-center'} onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Finish" : "Edit"}</a>
 
+                {isEditing?
+                    <a className={'text-center'} onClick={() => handleSubmit()}>I'm done editing</a> :
+                    <a className={'text-center'} onClick={() => setIsEditing(!isEditing)}>Edit</a>
+                }
             </main>
         </div>
     )
