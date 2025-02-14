@@ -1,7 +1,10 @@
 import styles from "./page.module.css";
+import {Navbar} from "../../../components/navbar";
 
 export default function About() {
 	return (
+		<>
+			<Navbar/>
 		<div className={styles.page}>
 			<main className={styles.main}>
 				<ol>
@@ -35,5 +38,6 @@ export default function About() {
 				</ol>
 			</footer>
 		</div>
+		</>
 	)
 }

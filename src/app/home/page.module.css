@@ -155,7 +155,9 @@ a.secondary {
     justify-content: center;
 }
 }
-
+.realtime {
+    background-color: var(--gray-alpha-100);
+}
 @media (prefers-color-scheme: dark) {
 .logo {
     filter: invert();
