@@ -93,7 +93,7 @@ export default function home() {
     return (
         <div>
             <Navbar />
-            <main className={'flex flex-row min-h-svh bg-zinc-950'}>
+            <main className={'flex flex-row min-h-svh text-white'}>
 
                 {/* realtime */}
                 <div className={' flex flex-col w-full items-center justify-center' }>
@@ -148,7 +148,7 @@ export default function home() {
                         <h1 className={'text-3xl pt-5'}> == History == </h1>
                         <table className="min-w-full border border-gray-300 shadow-lg rounded-lg ">
                             <thead>
-                            <tr className="bg-gray-800 text-white">
+                            <tr className="bg-gray-800 ">
                                 <th className="px-4 py-2 ">ID </th>
                                 <th className="px-4 py-2"> CO amount</th>
                                 <th className="px-4 py-2"> TimeStamp</th>
