@@ -3,7 +3,6 @@ import {Navbar} from "../../../components/navbar";
 import {jwtDecode} from "jwt-decode";
 import dynamic from "next/dynamic";
 import {useEffect, useState} from "react";
-import styles from "./page.module.css";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 
