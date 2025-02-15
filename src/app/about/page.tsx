@@ -26,9 +26,6 @@ export default function About() {
 			</main>
 			<footer className={styles.footer}>
 				<ol>
-					<li className={'text-lg text-center font-bold'}>
-						<a href={'/..'}> Go back </a>
-					</li>
 					<li className={'text-lg'}>
 						Created in part by Yves-Shaheem Shedid & Mathieu Gouveia Sousa.
 					</li>
