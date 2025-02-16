@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 
-export default function home() {
+export default function Home() {
     let token: any;
     let userId: any;
     const [co, setCo] = useState(0);
