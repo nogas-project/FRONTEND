@@ -73,22 +73,21 @@ export default function Home() {
         const interval0 = setInterval(async () => {
             const res = await getLatestData();
             setCo(res.co2_amount);
-        }, 500);
+        }, 30000);
         const interval1 = setInterval(async () => {
             const res = await getDataHistory();
             if (Array.isArray(res))setHistory(res);
-        }, 2000);
+        }, 60000);
 
         return () => {clearInterval(interval0);clearInterval(interval1); };
     }, []);
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            console.log(co);
             if(co > 200){
                 toast.error(message(co));
             }
-        }, 5000);
+        }, 30000);
         return () => clearInterval(interval);
     }, [co]);
 
