@@ -3,8 +3,17 @@ import styles from "./page.module.css"
 import {useEffect, useState} from "react";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
+import {getTokenFromCookie} from "../../../lib/auth.lib";
 
 export default function Profile() {
+    // useEffect(() => {
+    //     // Middleware handles protection, but you can add client-side checks here
+    //     const token = getTokenFromCookie()
+    //
+    //     if (!token) {
+    //         window.location.href = '/login'
+    //     }
+    // }, [])
 
     // todo : add navbar
     // todo : this will be a protected route requiring authentication
