@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCookie } from 'cookies-next'
 import {validateToken} from "../lib/auth.lib";
 
-export async function authMiddleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     // Define protected routes
     const protectedRoutes = ['/profile', '/home']
 
@@ -12,18 +12,19 @@ export async function authMiddleware(request: NextRequest) {
     }
 
     // Get token from cookie
-    const token = getCookie('jwt')
+    const token = request.cookies.get("token")
 
-    // Optimistic check: verify token presence and basic structure
     if (!token) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
+    const tokenValue = token.value
     // Secure check: validate token with backend
-    const isValid = await validateToken(token)
+    //@ts-ignore
+    const isValid = await validateToken(tokenValue)
 
     if (!isValid) {
-        return NextResponse.redirect(new URL('/login', request.url))
+        return NextResponse.redirect(new URL('/register', request.url))
     }
 
     return NextResponse.next()
@@ -31,5 +32,5 @@ export async function authMiddleware(request: NextRequest) {
 
 // Configure middleware to run on protected routes
 export const config = {
-    matcher: ['/profile/:path*', '/home/:path*']
+    matcher: ['/profile', '/home']
 }

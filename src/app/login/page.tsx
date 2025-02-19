@@ -3,6 +3,7 @@ import Form from "next/form";
 import styles from "./page.module.css";
 import {FormEvent, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
+import {setCookie} from "cookies-next";
 
 export default function Login() {
     const router = useRouter();
@@ -48,7 +49,7 @@ export default function Login() {
         const port = process.env.BE_PORT || 3001;
         try {
             console.log(JSON.stringify(data));
-            const response = await fetch(`http://localhost:${port}/user/login`, {
+            const response = await fetch(`http://localhost:${port}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,10 +69,8 @@ export default function Login() {
 
             const token = await response.json();
             console.log('Success:', token);
-
-            document.cookie = `token=${token}; path=/`
-            router.push("/home");
-
+            setCookie('token', token);
+            router.push('/profile')
         } catch (error) {
             setCredentialsError("")
             setServerError('Something went wrong on our end, Sorry, try again later');

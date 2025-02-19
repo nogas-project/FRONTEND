@@ -131,7 +131,7 @@ export default function Register() {
         setIsLoading(true);
         try {
             console.log("Trying to reach BE...")
-            const response = await fetch(`http://localhost:${port}/user/register`, {
+            const response = await fetch(`http://localhost:${port}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
