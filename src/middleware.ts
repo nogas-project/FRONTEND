@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCookie } from 'cookies-next'
-import {validateToken} from "../lib/auth.lib";
+import { validateToken } from "../lib/auth.lib";
+import {match} from "node:assert";
 
 export async function middleware(request: NextRequest) {
+    // TODO: route /login to /profile if user is already connected
+
     // Define protected routes
     const protectedRoutes = ['/profile', '/home']
 
@@ -19,8 +21,8 @@ export async function middleware(request: NextRequest) {
     }
 
     const tokenValue = token.value
+
     // Secure check: validate token with backend
-    //@ts-ignore
     const isValid = await validateToken(tokenValue)
 
     if (!isValid) {
