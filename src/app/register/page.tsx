@@ -1,5 +1,4 @@
 'use client';
-import Form from "next/form";
 import {FormEvent, useEffect, useState} from "react";
 import styles from "./page.module.css";
 import {useRouter} from "next/navigation";
@@ -131,7 +130,7 @@ export default function Register() {
         setIsLoading(true);
         try {
             console.log("Trying to reach BE...")
-            const response = await fetch(`http://localhost:${port}/user/register`, {
+            const response = await fetch(`http://localhost:${port}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -216,8 +215,7 @@ export default function Register() {
         <div className={styles.page}>
             <main className={styles.main}>
                 <p className={styles.title}>== SIGN UP ==</p>
-                <Form onSubmit={handleSubmit} action={"/"}>
-
+                <form onSubmit={handleSubmit}>
                     <ol>
                         <li className={"text-red-500"}>{serverError}</li>
                         <li>
@@ -315,7 +313,7 @@ export default function Register() {
                     <div className={'text-center'}>
                         <button className={styles.submit} type='submit'>[ Submit ]</button>
                     </div>
-                </Form>
+                </form>
 
                 {/* Loading overlay when reaching to BE, spinner would be nicer */}
                 {isLoading && (
