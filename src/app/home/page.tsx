@@ -4,6 +4,7 @@ import {jwtDecode} from "jwt-decode";
 import dynamic from "next/dynamic";
 import {useEffect, useState} from "react";
 import { Toaster, toast } from "sonner";
+import {isBoolean} from "node:util";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 export default function Home() {
@@ -22,6 +23,12 @@ export default function Home() {
             ?.split("=")[1];
 
         return token
+    }
+    function getNotication() {
+        return document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("notif"))
+            ?.split("=")[1];
     }
     async function getLatestData() {
         token = getToken()!;
@@ -69,6 +76,37 @@ export default function Home() {
             throw new Error("Unable to load profile data.")
         }
     }
+    async function sendEmailToContact(text: string){
+        token = getToken()!;
+        const d = {
+            subject:"NoGas security email",
+            mess:text
+        };
+
+        if (token) {
+            const decoded = jwtDecode(token);
+
+            // @ts-ignore
+            userId = decoded.id
+
+            const response = await fetch(`http://localhost:3001/sendEmail/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(d),
+            })
+            console.log(JSON.stringify(d));
+            const data = await response.json();
+            console.log(data);
+            if (data) {
+                return data;
+            }
+        } else {
+            throw new Error("Unable to send email to contact")
+        }
+    }
     useEffect(() => {
         const interval0 = setInterval(async () => {
             const res = await getLatestData();
@@ -79,15 +117,18 @@ export default function Home() {
             if (Array.isArray(res))setHistory(res);
         }, 60000);
 
-        return () => {clearInterval(interval0);clearInterval(interval1); };
+        return () => {clearInterval(interval0);clearInterval(interval1);};
     }, []);
 
     useEffect(() => {
         const interval = setInterval(async () => {
             if(co > 200){
-                toast.error(message(co));
+                if(getNotication() == 'true'){
+                    toast.error("Email has been sent to your contact !\n You should go disable the alarm !");
+                    await sendEmailToContact(message(co)!);
+                }
             }
-        }, 30000);
+        }, 15000);
         return () => clearInterval(interval);
     }, [co]);
 
