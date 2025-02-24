@@ -1,4 +1,4 @@
-# NoGas_BE
+# NoGas_FE
 ## En cadre avec le cours *Projet - Développement d'application IDO*
 **Runs alongside the backend [here](https://github.com/Yves-Shaheem/NoGas_BE)**
 
