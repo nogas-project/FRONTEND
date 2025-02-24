@@ -88,13 +88,13 @@ export default function Login() {
                     <p className={styles.title}>== LOGIN ==</p>
                     <ol>
                         <li>{credentialsError}</li>
-                        <li className={'text-red-500'} >{serverError}</li>
+                        <li className={'text-red-500'}>{serverError}</li>
                         <li>
                             Email:
                             <input onChange={(e) => setEmail(e.target.value)}
                                    type="text"
                                    className={styles.input}
-                                   placeholder="Email" />
+                                   placeholder="Email"/>
                             <ol>{emailError}</ol>
                         </li>
                         <li>
@@ -102,7 +102,7 @@ export default function Login() {
                             <input onChange={(e) => setPassword(e.target.value)}
                                    type="password"
                                    className={styles.input}
-                                   placeholder="Password" />
+                                   placeholder="Password"/>
                             <ol>{passwordError}</ol>
                         </li>
                     </ol>
@@ -112,7 +112,14 @@ export default function Login() {
                     </div>
                 </Form>
             </main>
-
+            <footer className={styles.footer}>Don't have an account?
+                <a
+                    className={'font-bold '}
+                    href={'/register'}
+                >
+                    Sign up here.
+                </a>
+            </footer>
         </div>
 
     )
