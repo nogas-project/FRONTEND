@@ -4,7 +4,6 @@ import {jwtDecode} from "jwt-decode";
 import dynamic from "next/dynamic";
 import {useEffect, useState} from "react";
 import { Toaster, toast } from "sonner";
-import {isBoolean} from "node:util";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 export default function Home() {
@@ -155,6 +154,7 @@ export default function Home() {
                 <div className={' flex flex-col w-full items-center justify-center' }>
                     <div className={"bg-zinc-900/60 border-zinc-900 rounded-lg m-10 flex flex-col gap-5 m-px "}>
                         <h3 className={'text-3xl text-center mb-10'}> == {message(co)} ==</h3>
+                        <div data-testid="gauge">
                         <GaugeComponent
                             style={{width: '500px'}}
                             maxValue={3000}
@@ -193,7 +193,7 @@ export default function Home() {
                                 animationDelay: 0
                             }}
                         />
-
+                        </div>
                     </div>
 
                 </div>
