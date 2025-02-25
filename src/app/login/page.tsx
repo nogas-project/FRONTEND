@@ -2,6 +2,7 @@
 import styles from "./page.module.css";
 import {FormEvent, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
+import {setCookie} from "cookies-next";
 
 export default function Login() {
     const router = useRouter();
@@ -47,7 +48,7 @@ export default function Login() {
         const port = process.env.BE_PORT || 3001;
         try {
             console.log(JSON.stringify(data));
-            const response = await fetch(`http://localhost:${port}/user/login`, {
+            const response = await fetch(`http://localhost:${port}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -67,10 +68,8 @@ export default function Login() {
 
             const token = await response.json();
             console.log('Success:', token);
-
-            document.cookie = `token=${token}; path=/`
-            router.push("/home");
-
+            setCookie('token', token);
+            router.push('/profile')
         } catch (error) {
             setCredentialsError("")
             setServerError('Something went wrong on our end, Sorry, try again later');
@@ -88,13 +87,13 @@ export default function Login() {
                     <p className={styles.title}>== LOGIN ==</p>
                     <ol>
                         <li>{credentialsError}</li>
-                        <li className={'text-red-500'} >{serverError}</li>
+                        <li className={'text-red-500'}>{serverError}</li>
                         <li>
                             Email:
                             <input onChange={(e) => setEmail(e.target.value)}
                                    type="text"
                                    className={styles.input}
-                                   placeholder="Email" />
+                                   placeholder="Email"/>
                             <ol>{emailError}</ol>
                         </li>
                         <li>
@@ -102,7 +101,7 @@ export default function Login() {
                             <input onChange={(e) => setPassword(e.target.value)}
                                    type="password"
                                    className={styles.input}
-                                   placeholder="Password" />
+                                   placeholder="Password"/>
                             <ol>{passwordError}</ol>
                         </li>
                     </ol>
@@ -112,7 +111,14 @@ export default function Login() {
                     </div>
                 </form>
             </main>
-
+            <footer className={styles.footer}>Don't have an account?
+                <a
+                    className={'font-bold '}
+                    href={'/register'}
+                >
+                    Sign up here.
+                </a>
+            </footer>
         </div>
 
     )
