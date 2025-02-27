@@ -1,7 +1,10 @@
 import styles from "./page.module.css";
+import {Navbar} from "../../../components/navbar";
 
 export default function About() {
 	return (
+		<>
+			<Navbar/>
 		<div className={styles.page}>
 			<main className={styles.main}>
 				<ol>
@@ -26,14 +29,12 @@ export default function About() {
 			</main>
 			<footer className={styles.footer}>
 				<ol>
-					<li className={'text-lg text-center font-bold'}>
-						<a href={'/..'}> Go back </a>
-					</li>
 					<li className={'text-lg'}>
 						Created in part by Yves-Shaheem Shedid & Mathieu Gouveia Sousa.
 					</li>
 				</ol>
 			</footer>
 		</div>
+		</>
 	)
 }

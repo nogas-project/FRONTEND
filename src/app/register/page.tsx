@@ -15,7 +15,7 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [phone, setPhone] = useState("");
     const [contacts, setContacts] = useState(
-        [{'id': 1, 'name': '', 'phone' : ''}]
+        [{'id': 1, 'name': '', 'email' : ''}]
     )
 
     // Handle input verification
@@ -29,7 +29,7 @@ export default function Register() {
     const [emailError, setEmailError] = useState("");
     const [contactsError, setContactsError] = useState("");
     const [contactsNameError, setContactsNameError] = useState("");
-    const [contactsPhoneError, setContactsPhoneError] = useState("");
+    const [contactsEmailError, setContactsEmailError] = useState("");
     const [serverError, setServerError] = useState("");
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -79,10 +79,10 @@ export default function Register() {
         }
 
         // Checks if there's at least one emergency contact, if they all have names,
-        // and if they all have proper phone numbers
-        let hasInvalidPhone = false;
+        // and if they all have proper emails
+        let hasInvalidEmail = false;
         let hasInvalidName = false;
-        if (!contacts[0].name && !contacts[0].phone) {
+        if (!contacts[0].name && !contacts[0].email) {
             setContactsError("Make sure to have at least one emergency contact")
             isValid = false;
         } else {
@@ -94,14 +94,14 @@ export default function Register() {
                 hasInvalidName = true;
                 break;
             }
-            if (!phoneRegex.test(contacts[i].phone)) {
+            if (!emailRegex.test(contacts[i].email)) {
                 isValid = false;
-                hasInvalidPhone = true;
+                hasInvalidEmail = true;
                 break;
             }
         }
         hasInvalidName ? setContactsNameError("One of your contacts' name is missing") : setContactsNameError("");
-        hasInvalidPhone ? setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555") : setContactsPhoneError("");
+        hasInvalidEmail ? setContactsEmailError("One of your contacts' email is missing or incorrect") : setContactsEmailError("");
 
         if (!isValid) {
             console.log("Validation failed. Please fix the errors.");
@@ -185,7 +185,7 @@ export default function Register() {
     const [showPlus, setShowPlus] = useState(true)
     const [showMinus, setShowMinus] = useState(false)
     function handleAdd() {
-        setContacts([...contacts, {'id': contacts.length + 1, 'name': '', 'phone' : ''}])
+        setContacts([...contacts, {'id': contacts.length + 1, 'name': '', 'email' : ''}])
     }
     const handleDelete = (index: number) => {
         setContacts(oldValues => {
@@ -220,7 +220,9 @@ export default function Register() {
                         <li className={"text-red-500"}>{serverError}</li>
                         <li>
                             First Name:
-                            <input onChange={(e) => {setFirstName(e.target.value)}}
+                            <input onChange={(e) => {
+                                setFirstName(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="text"
                                    placeholder="First Name"/>
@@ -228,7 +230,9 @@ export default function Register() {
                         </li>
                         <li>
                             Last Name:
-                            <input onChange={(e) => {setLastName(e.target.value)}}
+                            <input onChange={(e) => {
+                                setLastName(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="text"
                                    placeholder="Last Name"/>
@@ -236,7 +240,9 @@ export default function Register() {
                         </li>
                         <li>
                             Email:
-                            <input onChange={(e) => {setEmail(e.target.value)}}
+                            <input onChange={(e) => {
+                                setEmail(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="text"
                                    placeholder="Email"/>
@@ -244,7 +250,9 @@ export default function Register() {
                         </li>
                         <li>
                             Password:
-                            <input onChange={(e) => {setPassword(e.target.value)}}
+                            <input onChange={(e) => {
+                                setPassword(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="password"
                                    placeholder="Password"/>
@@ -252,7 +260,9 @@ export default function Register() {
                         </li>
                         <li>
                             Confirm Password:
-                            <input onChange={(e) => {setConfirmPassword(e.target.value)}}
+                            <input onChange={(e) => {
+                                setConfirmPassword(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="password"
                                    placeholder="Password"/>
@@ -261,7 +271,9 @@ export default function Register() {
                         </li>
                         <li>
                             Phone:
-                            <input onChange={(e) => {setPhone(e.target.value)}}
+                            <input onChange={(e) => {
+                                setPhone(e.target.value)
+                            }}
                                    className={styles.input}
                                    type="text"
                                    placeholder="Number"/>
@@ -273,16 +285,20 @@ export default function Register() {
                                 <div key={contact.id}>
                                     <ul>
                                         <li>
-                                            <input onChange={(e) => {contact.name = e.target.value}}
+                                            <input onChange={(e) => {
+                                                contact.name = e.target.value
+                                            }}
                                                    className={styles.input}
                                                    type="text"
                                                    placeholder="Name"/>
                                         </li>
                                         <li>
-                                            <input onChange={(e) => {contact.phone = e.target.value}}
+                                            <input onChange={(e) => {
+                                                contact.email = e.target.value
+                                            }}
                                                    className={styles.inputb}
                                                    type="text"
-                                                   placeholder="Phone"/>
+                                                   placeholder="Email"/>
                                         </li>
                                     </ul>
                                 </div>
@@ -291,7 +307,7 @@ export default function Register() {
                             <ol>
                                 <li>{contactsError}</li>
                                 <li>{contactsNameError}</li>
-                                <li>{contactsPhoneError}</li>
+                                <li>{contactsEmailError}</li>
                             </ol>
 
                             {/* + and - buttons */}
@@ -322,6 +338,14 @@ export default function Register() {
                     </div>
                 )}
             </main>
+            <footer className={styles.footer}>If you already have an account,
+                <a
+                    className={'font-bold '}
+                    href={'/login'}
+                >
+                    login here.
+                </a>
+            </footer>
 
         </div>
     )

@@ -96,8 +96,9 @@ a.secondary {
 .footer {
   grid-row-start: 3;
   display: flex;
-  gap: 24px;
 }
+
+
 
 .footer a {
   margin-left: 6px;
@@ -154,6 +155,11 @@ a.secondary {
 
   /* Submit button underline */
   .button:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  a:hover {
     text-decoration: underline;
     text-underline-offset: 4px;
   }

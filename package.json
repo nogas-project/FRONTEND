@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.0.3",
+    "cookies-next": "^5.1.0",
     "dotenv": "^16.4.7",
     "jwt-decode": "^4.0.0",
     "next": "15.1.6",
@@ -18,6 +19,8 @@
     "postcss": "^8.5.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-gauge-component": "^1.2.64",
+    "sonner": "^1.7.4",
     "tailwindcss": "^4.0.3"
   },
   "devDependencies": {

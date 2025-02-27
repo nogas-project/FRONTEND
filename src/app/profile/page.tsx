@@ -3,8 +3,11 @@ import styles from "./page.module.css"
 import {useEffect, useState} from "react";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
+import {deleteCookie} from "cookies-next";
+import {useRouter} from "next/navigation";
 
 export default function Profile() {
+    const router = useRouter();
 
     // todo : add navbar
     // todo : this will be a protected route requiring authentication
@@ -32,13 +35,22 @@ export default function Profile() {
 
     async function loadProfileData() {
         token = getToken();
+        const port = process.env.BE_PORT || 3001;
         if (token) {
-            const decoded = jwtDecode(token);
+            // todo: possibly decode locally using frontend env secret instead
+            const decoded = await fetch(`http://localhost:${port}/auth/validate`, {
+                method: "POST",
+                headers: {
+                    contentType: "application/json",
+                    authorization: `Bearer ${token}`,
+                }
+            })
 
-            // @ts-ignore
-            userId = decoded.id
+            const decodedData = await decoded.json()
+            console.log(decodedData)
+            userId = decodedData.id
 
-            const response = await fetch(`http://localhost:3001/user/${userId}`, {
+            const response = await fetch(`http://localhost:${port}/user/${userId}`, {
                 method: "GET",
                 headers: {
                     contentType: "application/json",
@@ -69,7 +81,7 @@ export default function Profile() {
                 return data;
             }
         } catch (error) {
-            throw error
+            throw new Error("Unable to load contacts data.")
         }
     }
 
@@ -245,6 +257,11 @@ export default function Profile() {
         setIsEditing(!isEditing)
     }
 
+    function logout() {
+        deleteCookie("token");
+        router.push("/login");
+    }
+
     return (
         <div className={styles.page}>
             {/* Navbar will go here, it's in-dev with home page branch */}
@@ -290,9 +307,9 @@ export default function Profile() {
                             <li>{passwordError}</li>
                             <li>
                                 <input
-                                placeholder="Confirm new password"
-                                type="password"
-                                onChange={e => setConfirmPassword(e.target.value)}/>
+                                    placeholder="Confirm new password"
+                                    type="password"
+                                    onChange={e => setConfirmPassword(e.target.value)}/>
                                 <ol>{confirmPasswordError}</ol>
                             </li>
 
@@ -303,10 +320,14 @@ export default function Profile() {
                                 <div key={contact.id}>
                                     <ul>
                                         <li>
-                                            <input className={styles.input} onChange={(e) => (contact.name = e.target.value)} placeholder={contact.name}/>
+                                            <input className={styles.input}
+                                                   onChange={(e) => (contact.name = e.target.value)}
+                                                   placeholder={contact.name}/>
                                         </li>
                                         <li>
-                                            <input className={styles.inputb} onChange={(e) => (contact.phone = e.target.value)} placeholder={contact.phone}/>
+                                            <input className={styles.inputb}
+                                                   onChange={(e) => (contact.phone = e.target.value)}
+                                                   placeholder={contact.phone}/>
                                         </li>
                                     </ul>
                                 </div>
@@ -341,10 +362,14 @@ export default function Profile() {
                     </div>
                 }
 
-                {isEditing?
+                {isEditing ?
                     <a className={'text-center'} onClick={() => handleSubmit()}>I'm done editing</a> :
                     <a className={'text-center'} onClick={() => setIsEditing(!isEditing)}>Edit</a>
                 }
+                <a className={styles.logout} onClick={() => logout()}>
+                    Logout
+                </a>
+
             </main>
         </div>
     )
