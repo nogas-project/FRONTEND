@@ -265,7 +265,7 @@ export default function Register() {
                             }}
                                    className={styles.input}
                                    type="password"
-                                   placeholder="Password"/>
+                                   placeholder="Confirm password"/>
                             <ol>{confirmPasswordError}</ol>
 
                         </li>
@@ -290,7 +290,7 @@ export default function Register() {
                                             }}
                                                    className={styles.input}
                                                    type="text"
-                                                   placeholder="Name"/>
+                                                   placeholder="Contact's Name"/>
                                         </li>
                                         <li>
                                             <input onChange={(e) => {
@@ -298,7 +298,7 @@ export default function Register() {
                                             }}
                                                    className={styles.inputb}
                                                    type="text"
-                                                   placeholder="Email"/>
+                                                   placeholder="Contact's Email"/>
                                         </li>
                                     </ul>
                                 </div>
