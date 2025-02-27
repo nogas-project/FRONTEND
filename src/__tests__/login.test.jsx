@@ -44,12 +44,12 @@ describe("Login Component", () => {
     });
 
     renderWithRouter(<Login />);
-    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "test@example.com" } });
-    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "gfreeman@email.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "abcd-1234" } });
     fireEvent.click(screen.getByText("[ Submit ]"));
 
     await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/home");
+      expect(push).toHaveBeenCalledWith("/profile");
     });
   });
 

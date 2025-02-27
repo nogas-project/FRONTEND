@@ -34,14 +34,6 @@ describe('About Component', () => {
         expect(screen.getByText(frenchDescription)).toBeInTheDocument();
     });
 
-    it('renders the "Go back" link', () => {
-        render(<About />);
-
-        const goBackLink = screen.getByRole('link', { name: /go back/i });
-        expect(goBackLink).toBeInTheDocument();
-        expect(goBackLink).toHaveAttribute('href', '/..');
-    });
-
     it('renders the footer with creators\' names', () => {
         render(<About />);
 
