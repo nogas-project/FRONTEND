@@ -1,5 +1,4 @@
 "use client"
-import Form from "next/form";
 import styles from "./page.module.css";
 import {FormEvent, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
@@ -84,7 +83,7 @@ export default function Login() {
     return (
         <div className={styles.page}>
             <main className={styles.main}>
-                <Form onSubmit={handleSubmit} action="/" className={styles.login}>
+                <form onSubmit={handleSubmit} action="/" className={styles.login}>
                     <p className={styles.title}>== LOGIN ==</p>
                     <ol>
                         <li>{credentialsError}</li>
@@ -110,7 +109,7 @@ export default function Login() {
                     <div className={styles.submit}>
                         <button type="submit" className={styles.button}>[ Submit ]</button>
                     </div>
-                </Form>
+                </form>
             </main>
             <footer className={styles.footer}>Don't have an account?
                 <a

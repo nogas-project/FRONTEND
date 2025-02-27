@@ -29,14 +29,29 @@ export default function Index() {
 
         </main>
         <footer className={styles.footer}>
-          <div>If you already have an account,
-            <a
-                className={'font-bold'}
-                href={'/login'}
-            >
-                login here.
-            </a>
-          </div>
+            <ol>
+                <li>
+                    <div>To learn more about our website,
+                        <a
+                            href={'/about'}
+                            className={'font-bold'}
+                        >click here.
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div>If you already have an account,
+                        <a
+                            className={'font-bold'}
+                            href={'/login'}
+                        >
+                            login here.
+                        </a>
+                    </div>
+                </li>
+            </ol>
+
+
         </footer>
       </div>
   );

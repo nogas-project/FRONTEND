@@ -1,10 +1,20 @@
 import styles from "./page.module.css";
 import {Navbar} from "../../../components/navbar";
+import {getCookie} from "cookies-next";
 
 export default function About() {
+
+	// only show navbar if connected
+	function getToken() {
+		let token;
+		token = getCookie("token");
+
+		return token
+	}
+
 	return (
 		<>
-			<Navbar/>
+			{getToken() ? <Navbar/> : null}
 		<div className={styles.page}>
 			<main className={styles.main}>
 				<ol>
