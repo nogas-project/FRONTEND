@@ -1,20 +1,14 @@
+'use client'
 import styles from "./page.module.css";
 import {Navbar} from "../../../components/navbar";
-import {getCookie} from "cookies-next";
+import {getTokenFromCookie} from "../../../lib/auth.lib";
 
 export default function About() {
 
-	// only show navbar if connected
-	function getToken() {
-		let token;
-		token = getCookie("token");
-
-		return token
-	}
-
+	// Only shows navbar if connected
 	return (
 		<>
-			{getToken() ? <Navbar/> : null}
+			{getTokenFromCookie() ? <Navbar/> : null}
 		<div className={styles.page}>
 			<main className={styles.main}>
 				<ol>
@@ -39,6 +33,11 @@ export default function About() {
 			</main>
 			<footer className={styles.footer}>
 				<ol>
+					{getTokenFromCookie() ?
+					null :
+						<li className={'text-lg text-center font-bold'}>
+							<a href={'/..'}> Go back </a>
+						</li>}
 					<li className={'text-lg'}>
 						Created in part by Yves-Shaheem Shedid & Mathieu Gouveia Sousa.
 					</li>

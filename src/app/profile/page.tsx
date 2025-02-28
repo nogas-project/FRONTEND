@@ -2,27 +2,24 @@
 import styles from "./page.module.css"
 import {useEffect, useState} from "react";
 import Image from "next/image";
-import { jwtDecode } from "jwt-decode";
 import {deleteCookie} from "cookies-next";
 import {useRouter} from "next/navigation";
 import {getTokenFromCookie, validateToken} from "../../../lib/auth.lib";
+import {Navbar} from "../../../components/navbar";
 
 export default function Profile() {
     const router = useRouter();
-
-    // todo : add navbar
-    // todo : this will be a protected route requiring authentication
     const [isEditing, setIsEditing] = useState(false)
 
     let userId: any;
     let token: any;
-    const [firstName, setFirstName] = useState("")
-    const [lastName, setLastName] = useState("")
-    const [email, setEmail] = useState("")
-    const [phone, setPhone] = useState("")
+    const [firstName, setFirstName] = useState("Loading...")
+    const [lastName, setLastName] = useState("Loading...")
+    const [email, setEmail] = useState("Loading...")
+    const [phone, setPhone] = useState("Loading...")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [contacts, setContacts] = useState([{"id": 1, "name": "joe", "phone": "514-514-5555"}])
+    const [contacts, setContacts] = useState([{"id": 1, "name": "n/a", "email": "n/a@email.com"}])
 
     async function loadProfileData() {
         token = getTokenFromCookie();
@@ -74,8 +71,6 @@ export default function Profile() {
             setLastName(data.last_name);
             setEmail(data.email);
             setPhone(data.phone);
-            setPassword(data.password);
-            setConfirmPassword(data.password);
             // Load contacts
             loadContactsData().then(data => {
                 setContacts(data);
@@ -83,7 +78,7 @@ export default function Profile() {
         });
     }, []); // Empty dependency array ensures this runs only once
 
-    // Mostly code from register page from here
+    // Mostly code from register page from here, it all should be in a component of some sort
     // Handle input verification
     const phoneRegex : RegExp = /^\d{3}-\d{3}-\d{4}$/;
     const emailRegex : RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -95,10 +90,11 @@ export default function Profile() {
     const [emailError, setEmailError] = useState("");
     const [contactsError, setContactsError] = useState("");
     const [contactsNameError, setContactsNameError] = useState("");
-    const [contactsPhoneError, setContactsPhoneError] = useState("");
+    const [contactsEmailError, setContactsEmailError] = useState("");
     const [serverError, setServerError] = useState("");
 
     async function handleSubmit() {
+        // is in editing-mode
         let isValid = true;
 
         if (!firstName) {
@@ -144,10 +140,10 @@ export default function Profile() {
         }
 
         // Checks if there's at least one emergency contact, if they all have names,
-        // and if they all have proper phone numbers
-        let hasInvalidPhone = false;
+        // and if they all have proper email numbers
+        let hasInvalidEmail = false;
         let hasInvalidName = false;
-        if (!contacts[0].name && !contacts[0].phone) {
+        if (!contacts[0].name && !contacts[0].email) {
             setContactsError("Make sure to have at least one emergency contact")
             isValid = false;
         } else {
@@ -159,14 +155,14 @@ export default function Profile() {
                 hasInvalidName = true;
                 break;
             }
-            if (!phoneRegex.test(contacts[i].phone)) {
+            if (!emailRegex.test(contacts[i].email)) {
                 isValid = false;
-                hasInvalidPhone = true;
+                hasInvalidEmail = true;
                 break;
             }
         }
         hasInvalidName ? setContactsNameError("One of your contacts' name is missing") : setContactsNameError("");
-        hasInvalidPhone ? setContactsPhoneError("One of your contacts' phone number is missing or incorrect, it should look like this: 555-555-5555") : setContactsPhoneError("");
+        hasInvalidEmail ? setContactsEmailError("One of your contacts' email") : setContactsEmailError("");
 
         if (!isValid) {
             console.log("Validation failed. Please fix the errors.");
@@ -188,18 +184,16 @@ export default function Profile() {
         // Everything is valid, send PUT
         const port = process.env.BE_PORT || 3001;
         const token : any = getTokenFromCookie();
-        const decoded = jwtDecode(token);
-        // @ts-ignore
+        const decoded = await validateToken(token);
         const userId = decoded.id
 
-        console.log(userId);
-        console.log(JSON.stringify(profileData));
+        // Profile PUT
         try {
             const response = await fetch(`http://localhost:${port}/user/${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    authorization: `Bearer ${token}`,
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(profileData)
             });
@@ -216,23 +210,28 @@ export default function Profile() {
             throw error
         }
 
-        // // Contacts PUT
-        // for (let i = 0; i < contacts.length; i++) {
-        //     console.log(contactData.contacts[i])
-        //     const contactResponse = await fetch(`http://localhost:${port}/contacts/${userId}`, {
-        //         method: 'PUT',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             authorization: `Bearer ${token}`,
-        //         },
-        //         body: JSON.stringify(contactData.contacts[i]),
-        //     });
-        //
-        //     if (!contactResponse.ok) {
-        //         throw new Error("Couldn't add contact");
-        //     }
-        //     console.log('Success:', contactResponse);
-        // }
+        // Contacts PUT
+        try {
+            for (let i = 0; i < contacts.length; i++) {
+                console.log(contactData.contacts[i])
+                const contactResponse = await fetch(`http://localhost:${port}/contacts/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(contactData.contacts[i]),
+                });
+
+                if (!contactResponse.ok) {
+                    throw new Error("Couldn't add contact");
+                }
+                console.log('Success:', contactResponse);
+            }
+        } catch (error) {
+            throw error
+        }
+
 
         // Exit editing mode
         setIsEditing(!isEditing)
@@ -244,8 +243,9 @@ export default function Profile() {
     }
 
     return (
+        <>
+            <Navbar/>
         <div className={styles.page}>
-            {/* Navbar will go here, it's in-dev with home page branch */}
             <main className={isEditing ? styles.mainEdit : styles.main}>
                 <Image
                     className={styles.logo}
@@ -280,7 +280,6 @@ export default function Profile() {
                                 onChange={e => setPhone(e.target.value)}/>
                             <li>{phoneError}</li>
                             <li className={styles.heading}>Your password:</li>
-                            {/* Pop up to inform the password is changed would be nice */}
                             <input
                                 placeholder="Enter new password"
                                 type="password"
@@ -296,19 +295,19 @@ export default function Profile() {
 
                             <li className={styles.heading}>Your emergency contacts:</li>
                             <li>{contactsNameError}</li>
-                            <li>{contactsPhoneError}</li>
+                            <li>{contactsEmailError}</li>
                             {contacts.map(contact => (
                                 <div key={contact.id}>
                                     <ul>
                                         <li>
-                                            <input className={styles.input}
+                                            <input
                                                    onChange={(e) => (contact.name = e.target.value)}
                                                    placeholder={contact.name}/>
                                         </li>
                                         <li>
-                                            <input className={styles.inputb}
-                                                   onChange={(e) => (contact.phone = e.target.value)}
-                                                   placeholder={contact.phone}/>
+                                            <input
+                                                   onChange={(e) => (contact.email = e.target.value)}
+                                                   placeholder={contact.email}/>
                                         </li>
                                     </ul>
                                 </div>
@@ -334,7 +333,7 @@ export default function Profile() {
                                     <div key={contact.id}>
                                         <ul>
                                             <li> {contact.name} </li>
-                                            <li> {contact.phone} </li>
+                                            <li> {contact.email} </li>
                                         </ul>
                                     </div>
                                 ))}
@@ -353,5 +352,6 @@ export default function Profile() {
 
             </main>
         </div>
+        </>
     )
 }
