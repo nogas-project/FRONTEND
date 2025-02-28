@@ -97,6 +97,7 @@ a.secondary {
   grid-row-start: 3;
   display: flex;
   gap: 24px;
+  text-align: center;
 }
 
 .footer a {
