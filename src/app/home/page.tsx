@@ -4,6 +4,7 @@ import {jwtDecode} from "jwt-decode";
 import dynamic from "next/dynamic";
 import {useEffect, useState} from "react";
 import { Toaster, toast } from "sonner";
+import {validateToken} from "../../../lib/auth.lib";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 export default function Home() {
@@ -32,7 +33,7 @@ export default function Home() {
     async function getLatestData() {
         token = getToken()!;
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = validateToken(token);
 
             // @ts-ignore
             userId = decoded.id
@@ -55,7 +56,7 @@ export default function Home() {
     async function getDataHistory() {
         token = getToken()!;
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = await validateToken(token);
 
             // @ts-ignore
             userId = decoded.id
@@ -79,7 +80,7 @@ export default function Home() {
         token = getToken()!;
 
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = await validateToken(token)
 
             // @ts-ignore
             userId = decoded.id
