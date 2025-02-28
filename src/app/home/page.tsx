@@ -75,12 +75,8 @@ export default function Home() {
             throw new Error("Unable to load profile data.")
         }
     }
-    async function sendEmailToContact(text: string){
+    async function sendEmailToContact(){
         token = getToken()!;
-        const d = {
-            subject:"NoGas security email",
-            mess:text
-        };
 
         if (token) {
             const decoded = jwtDecode(token);
@@ -93,12 +89,9 @@ export default function Home() {
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(d),
+                }
             })
-            console.log(JSON.stringify(d));
             const data = await response.json();
-            console.log(data);
             if (data) {
                 return data;
             }
@@ -124,7 +117,7 @@ export default function Home() {
             if(co > 200){
                 if(getNotication() == 'true'){
                     toast.error("Email has been sent to your contact !\n You should go disable the alarm !");
-                    await sendEmailToContact(message(co)!);
+                    await sendEmailToContact();
                 }
             }
         }, 15000);
