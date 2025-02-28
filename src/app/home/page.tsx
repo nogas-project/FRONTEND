@@ -4,6 +4,7 @@ import {jwtDecode} from "jwt-decode";
 import dynamic from "next/dynamic";
 import {useEffect, useState} from "react";
 import { Toaster, toast } from "sonner";
+import {validateToken} from "../../../lib/auth.lib";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
 export default function Home() {
@@ -11,8 +12,8 @@ export default function Home() {
     let userId: any;
     const [co, setCo] = useState(0);
     const [history, setHistory] = useState([{
-        co2_amount: 103,
-        timestamp: 17899225123
+        co2_amount: 0,
+        timestamp: 0
     }]);
     function getToken() {
         let token;
@@ -32,7 +33,7 @@ export default function Home() {
     async function getLatestData() {
         token = getToken()!;
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = validateToken(token);
 
             // @ts-ignore
             userId = decoded.id
@@ -55,7 +56,7 @@ export default function Home() {
     async function getDataHistory() {
         token = getToken()!;
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = await validateToken(token);
 
             // @ts-ignore
             userId = decoded.id
@@ -75,15 +76,11 @@ export default function Home() {
             throw new Error("Unable to load profile data.")
         }
     }
-    async function sendEmailToContact(text: string){
+    async function sendEmailToContact(){
         token = getToken()!;
-        const d = {
-            subject:"NoGas security email",
-            mess:text
-        };
 
         if (token) {
-            const decoded = jwtDecode(token);
+            const decoded = await validateToken(token)
 
             // @ts-ignore
             userId = decoded.id
@@ -93,12 +90,9 @@ export default function Home() {
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(d),
+                }
             })
-            console.log(JSON.stringify(d));
             const data = await response.json();
-            console.log(data);
             if (data) {
                 return data;
             }
@@ -124,7 +118,7 @@ export default function Home() {
             if(co > 200){
                 if(getNotication() == 'true'){
                     toast.error("Email has been sent to your contact !\n You should go disable the alarm !");
-                    await sendEmailToContact(message(co)!);
+                    await sendEmailToContact();
                 }
             }
         }, 15000);
