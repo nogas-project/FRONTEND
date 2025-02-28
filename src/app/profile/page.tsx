@@ -5,6 +5,7 @@ import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
 import {deleteCookie} from "cookies-next";
 import {useRouter} from "next/navigation";
+import {getTokenFromCookie, validateToken} from "../../../lib/auth.lib";
 
 export default function Profile() {
     const router = useRouter();
@@ -23,38 +24,19 @@ export default function Profile() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [contacts, setContacts] = useState([{"id": 1, "name": "joe", "phone": "514-514-5555"}])
 
-    function getToken() {
-        let token;
-        token = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("token"))
-            ?.split("=")[1];
-
-        return token
-    }
-
     async function loadProfileData() {
-        token = getToken();
+        token = getTokenFromCookie();
         const port = process.env.BE_PORT || 3001;
         if (token) {
             // todo: possibly decode locally using frontend env secret instead
-            const decoded = await fetch(`http://localhost:${port}/auth/validate`, {
-                method: "POST",
-                headers: {
-                    contentType: "application/json",
-                    authorization: `Bearer ${token}`,
-                }
-            })
-
-            const decodedData = await decoded.json()
-            console.log(decodedData)
+            const decodedData = await validateToken(token);
             userId = decodedData.id
 
             const response = await fetch(`http://localhost:${port}/user/${userId}`, {
                 method: "GET",
                 headers: {
-                    contentType: "application/json",
-                    authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             })
             const data = await response.json();
@@ -67,12 +49,11 @@ export default function Profile() {
     }
     async function loadContactsData() {
 
-        console.log("userId", userId);
         try {
             const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
                 method: "GET",
                 headers: {
-                    contentType: "application/json",
+                    "Content-Type": "application/json",
                     authorization: `Bearer ${token}`,
                 },
             })
@@ -206,7 +187,7 @@ export default function Profile() {
 
         // Everything is valid, send PUT
         const port = process.env.BE_PORT || 3001;
-        const token : any = getToken();
+        const token : any = getTokenFromCookie();
         const decoded = jwtDecode(token);
         // @ts-ignore
         const userId = decoded.id
@@ -217,7 +198,7 @@ export default function Profile() {
             const response = await fetch(`http://localhost:${port}/user/${userId}`, {
                 method: "PUT",
                 headers: {
-                    ContentType: "application/json",
+                    "Content-Type": "application/json",
                     authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(profileData)
