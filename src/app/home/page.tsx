@@ -11,8 +11,8 @@ export default function Home() {
     let userId: any;
     const [co, setCo] = useState(0);
     const [history, setHistory] = useState([{
-        co2_amount: 103,
-        timestamp: 17899225123
+        co2_amount: 0,
+        timestamp: 0
     }]);
     function getToken() {
         let token;
