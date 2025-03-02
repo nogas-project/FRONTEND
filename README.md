@@ -1,3 +1,4 @@
+[![codecov](https://codecov.io/github/Yves-Shaheem/NoGas_FE/branch/dev/graph/badge.svg?token=9G0UQUYO0R)](https://codecov.io/github/Yves-Shaheem/NoGas_FE)
 # NoGas_FE
 ## En cadre avec le cours *Projet - Développement d'application IDO*
 **Runs alongside the backend [here](https://github.com/Yves-Shaheem/NoGas_BE)**
