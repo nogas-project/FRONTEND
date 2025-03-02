@@ -7,9 +7,13 @@ on:
   push:
     branches:
       - action
+      - dev
+      - main
   pull_request:
     branches:
       - action
+      - dev
+      - main
 jobs:
   build:
 
