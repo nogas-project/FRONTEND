@@ -34,11 +34,12 @@ export default function Home() {
     async function getLatestData() {
         token = getToken()!;
         if (token) {
-            const decoded = validateToken(token);
+            const decoded = await validateToken(token);
 
             // @ts-ignore
             userId = decoded.id
 
+            console.log(decoded);
             const response = await fetch(`${URL}/latest/${userId}`, {
                 method: "GET",
                 headers: {
