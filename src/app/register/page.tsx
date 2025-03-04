@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import {useRouter} from "next/navigation";
 
 export default function Register() {
+    const URL = process.env.BE_URL;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -130,7 +131,7 @@ export default function Register() {
         setIsLoading(true);
         try {
             console.log("Trying to reach BE...")
-            const response = await fetch(`http://localhost:${port}/auth/register`, {
+            const response = await fetch(`${URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -155,7 +156,7 @@ export default function Register() {
             // Proceed and add emergency contacts
             for (let i = 0; i < contacts.length; i++) {
                 console.log(contactData.contacts[i])
-                const contactResponse = await fetch(`http://localhost:${port}/contacts/${result.mess}`, {
+                const contactResponse = await fetch(`${URL}/contacts/${result.mess}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

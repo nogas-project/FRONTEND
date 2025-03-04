@@ -8,6 +8,7 @@ import {getTokenFromCookie, validateToken} from "../../../lib/auth.lib";
 import {Navbar} from "../../../components/navbar";
 
 export default function Profile() {
+    const URL = process.env.BE_URL;
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false)
 
@@ -29,7 +30,7 @@ export default function Profile() {
             const decodedData = await validateToken(token);
             userId = decodedData.id
 
-            const response = await fetch(`http://localhost:${port}/user/${userId}`, {
+            const response = await fetch(`${URL}/user/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export default function Profile() {
     async function loadContactsData() {
 
         try {
-            const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
+            const response = await fetch(`${URL}/contacts/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -189,7 +190,7 @@ export default function Profile() {
 
         // Profile PUT
         try {
-            const response = await fetch(`http://localhost:${port}/user/${userId}`, {
+            const response = await fetch(`${URL}/user/${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -214,7 +215,7 @@ export default function Profile() {
         try {
             for (let i = 0; i < contacts.length; i++) {
                 console.log(contactData.contacts[i])
-                const contactResponse = await fetch(`http://localhost:${port}/contacts/${userId}`, {
+                const contactResponse = await fetch(`${URL}/contacts/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

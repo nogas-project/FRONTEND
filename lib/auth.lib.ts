@@ -1,12 +1,13 @@
 import { getCookie } from 'cookies-next'
 
 export async function validateToken(token: any) {
+    const URL = process.env.BE_URL;
     try {
         const port = process.env.BE_PORT || 3001
         JSON.stringify(token)
         const tokenData = {"token": token}
         console.log(tokenData)
-        const response = await fetch(`http://localhost:${port}/auth/validate`, {
+        const response = await fetch(`${URL}/auth/validate`, {
             method: 'POST',
             headers: {
                 "Content-Type": 'application/json',
