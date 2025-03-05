@@ -2,6 +2,7 @@
 import {FormEvent, useEffect, useState} from "react";
 import styles from "./page.module.css";
 import {useRouter} from "next/navigation";
+import {deleteCookie} from "cookies-next";
 
 export default function Register() {
     const router = useRouter();
@@ -156,13 +157,12 @@ export default function Register() {
                 body : JSON.stringify(loginData),
             })
 
-
             if (!response.ok) {
                 setIsLoading(false);
                 throw new Error("login after registering failed")
             }
 
-            const loginResult = await loginResponse.text()
+            const loginResult = await loginResponse.json()
 
             // Contacts are done separately because of the oneToMany
             // relation done in the backend.
@@ -187,7 +187,8 @@ export default function Register() {
                 console.log('Success:', contactResponse);
             }
 
-            // Send to login page
+            // Send to login page and delete cookie used for posting contacts
+            deleteCookie("token");
             router.push('/login');
 
         } catch (error) {

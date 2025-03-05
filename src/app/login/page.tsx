@@ -68,7 +68,7 @@ export default function Login() {
 
             const token = await response.text();
             console.log('Success:', token);
-            setCookie('token', token);
+            setCookie('token', JSON.parse(token));
             router.push('/profile')
         } catch (error) {
             setCredentialsError("")
