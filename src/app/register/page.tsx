@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 import {useRouter} from "next/navigation";
 
 export default function Register() {
-    const URL = process.env.BE_URL;
+    const URL = process.env.BE_URL || "http://localhost:3001";
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
