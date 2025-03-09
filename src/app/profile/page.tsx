@@ -14,17 +14,17 @@ export default function Profile() {
 
     let userId: any;
     let token: any;
+    const port = process.env.BE_PORT || 3001;
     const [firstName, setFirstName] = useState("Loading...")
     const [lastName, setLastName] = useState("Loading...")
     const [email, setEmail] = useState("Loading...")
     const [phone, setPhone] = useState("Loading...")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [contacts, setContacts] = useState([{"id": 1, "name": "n/a", "email": "n/a@email.com"}])
+    const [contacts, setContacts] = useState([{"id": 1, "name": "n/a", "email": "n/a@email.com", "new" : false}])
 
     async function loadProfileData() {
         token = getTokenFromCookie();
-        const port = process.env.BE_PORT || 3001;
         if (token) {
             // todo: possibly decode locally using frontend env secret instead
             const decodedData = await validateToken(token);
@@ -45,8 +45,8 @@ export default function Profile() {
             throw new Error("Unable to load profile data.")
         }
     }
-    async function loadContactsData() {
 
+    async function loadContactsData() {
         try {
             const response = await fetch(`${URL}/contacts/${userId}`, {
                 method: "GET",
@@ -74,6 +74,10 @@ export default function Profile() {
             setPhone(data.phone);
             // Load contacts
             loadContactsData().then(data => {
+                // Adds "new" fields to differentiate between contacts to modify and contacts to add
+                for (let i = 0; i < data.length; i++) {
+                   data[i].new = false;
+                }
                 setContacts(data);
             });
         });
@@ -163,7 +167,7 @@ export default function Profile() {
             }
         }
         hasInvalidName ? setContactsNameError("One of your contacts' name is missing") : setContactsNameError("");
-        hasInvalidEmail ? setContactsEmailError("One of your contacts' email") : setContactsEmailError("");
+        hasInvalidEmail ? setContactsEmailError("One of your contacts' email is incorrect") : setContactsEmailError("");
 
         if (!isValid) {
             console.log("Validation failed. Please fix the errors.");
@@ -178,16 +182,12 @@ export default function Profile() {
             password
         }
 
-        const contactData = {
-            contacts,
-        }
-
-        // Everything is valid, send PUT
+        // Everything is valid
         const port = process.env.BE_PORT || 3001;
         const token : any = getTokenFromCookie();
         const decoded = await validateToken(token);
         const userId = decoded.id
-
+        async function modifyProfile() {
         // Profile PUT
         try {
             const response = await fetch(`${URL}/user/${userId}`, {
@@ -198,41 +198,76 @@ export default function Profile() {
                 },
                 body: JSON.stringify(profileData)
             });
-
-            if (!response.ok) {
-                console.log("Something went wrong")
-                throw response;
-            }
-
-            const data = await response.json();
-            console.log(data);
-
-        } catch (error) {
-            throw error
-        }
-
-        // Contacts PUT
-        try {
-            for (let i = 0; i < contacts.length; i++) {
-                console.log(contactData.contacts[i])
-                const contactResponse = await fetch(`${URL}/contacts/${userId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        "Authorization": `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(contactData.contacts[i]),
-                });
-
-                if (!contactResponse.ok) {
-                    throw new Error("Couldn't add contact");
+                if (!response.ok) {
+                    console.log("Something went wrong")
+                    throw response;
                 }
-                console.log('Success:', contactResponse);
+
+                const data = await response.json();
+                console.log(data);
+
+            } catch (error) {
+                throw error
             }
-        } catch (error) {
-            throw error
         }
 
+        async function modifyContacts() {
+            try {
+                // loop through and modify any contact that wasn't just added, then add those that were
+                for (let i = 0; i < contacts.length; i++) {
+                    if (!contacts[i].new) {
+                        let contactData = {
+                            name: contacts[i].name,
+                            email: contacts[i].email,
+                            id: contacts[i].id,
+                        }
+
+                        const contactResponse = await fetch(`${URL}/contacts/${userId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(contactData),
+                        });
+
+                        if (!contactResponse.ok) {
+                            console.log(contactData)
+                            throw new Error("Couldn't modify contact");
+                        }
+                        console.log('Success:', contactResponse);
+                    }
+
+                    if (contacts[i].new) {
+                        let contactData = {
+                            name: contacts[i].name,
+                            email: contacts[i].email,
+                        }
+
+                        const contactResponse = await fetch(`${URL}/contacts/${userId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "Authorization": `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(contactData),
+                        });
+
+                        if (!contactResponse.ok) {
+                            throw new Error("Couldn't add contact");
+                        }
+                        console.log('Success:', contactResponse);
+                    }
+                }
+            } catch (error) {
+                throw error
+            }
+        }
+
+        // Profile PUT
+        await modifyProfile();
+        // Contacts PUT and POST
+        await modifyContacts();
 
         // Exit editing mode
         setIsEditing(!isEditing)
@@ -242,6 +277,59 @@ export default function Profile() {
         deleteCookie("token");
         router.push("/login");
     }
+
+    // For emergency contacts, we need a minimum of 1, and max of 3
+    // these functions handle when to show the buttons to add or remove them
+    const [showPlus, setShowPlus] = useState(true)
+    const [showMinus, setShowMinus] = useState(false)
+    function handleAdd() {
+        // id is irrelevant in the POST request and is temporary for mapping, flags this value for POST
+        setContacts([...contacts, {'id': contacts[contacts.length-1].id + 1, 'name': "Contact's name", 'email' : "Contact's email", new: true}])
+    }
+    async function handleDelete(index: number) {
+        setContacts(oldValues => {
+            return oldValues.filter((_, i) => i !== index)
+        })
+        const token : any = getTokenFromCookie();
+        const decoded = await validateToken(token);
+        const userId = decoded.id
+        try {
+            const contactId = contacts[index].id
+            const response = await fetch(`http://localhost:${port}/contacts/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({id: contactId}),
+            })
+
+            if (!response.ok) {
+                throw new Error("Couldn't delete contact");
+            }
+            console.log("Success:", response);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Render each time contacts is changed to accurately show + and -
+    useEffect(() => {
+        switch (contacts.length) {
+            case 1:
+                setShowPlus(true)
+                setShowMinus(false)
+                break;
+            case 2:
+                setShowMinus(true)
+                setShowPlus(true)
+                break;
+            case 3:
+                setShowMinus(true)
+                setShowPlus(false)
+                break;
+        }
+    }, [contacts])
 
     return (
         <>
@@ -313,6 +401,20 @@ export default function Profile() {
                                     </ul>
                                 </div>
                             ))}
+
+                            {/* + and - buttons */}
+                            <div>
+                                {showPlus ?
+                                    <p className={styles.button}
+                                       onClick={handleAdd}
+                                    >
+                                        + </p> : null}
+                                {showMinus ?
+                                    <p className={styles.button}
+                                       onClick={() => handleDelete(contacts.length - 1)}
+                                    >
+                                        - </p> : null}
+                            </div>
                         </ol>
                     </div> :
                     /* In normal mode */
@@ -347,6 +449,7 @@ export default function Profile() {
                     <a className={'text-center'} onClick={() => handleSubmit()}>I'm done editing</a> :
                     <a className={'text-center'} onClick={() => setIsEditing(!isEditing)}>Edit</a>
                 }
+
                 <a className={styles.logout} onClick={() => logout()}>
                     Logout
                 </a>

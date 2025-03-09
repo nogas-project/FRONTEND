@@ -2,6 +2,7 @@
 import {FormEvent, useEffect, useState} from "react";
 import styles from "./page.module.css";
 import {useRouter} from "next/navigation";
+import {deleteCookie} from "cookies-next";
 
 export default function Register() {
     const URL = process.env.BE_URL || "http://localhost:3001";
@@ -118,14 +119,6 @@ export default function Register() {
             phone,
         };
 
-        // Contacts are done separately because of the oneToMany
-        // relation done in the backend.
-        // this revision takes in mind that the backend returns the id
-        // of the user in the POST response.
-        const contactData = {
-            contacts,
-        }
-
         // Send data to BE using fetch
         let port = process.env.BE_PORT || 3001;
         setIsLoading(true);
@@ -151,17 +144,42 @@ export default function Register() {
             }
 
             const result = await response.json();
-            console.log('Success:', result.mess);
 
-            // Proceed and add emergency contacts
+            // Login before adding emergency contacts, fix to contacts risk highlighted in QA Check Trello
+            const loginData = {
+                email,
+                password,
+            }
+            const loginResponse = await fetch(`http://localhost:${port}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body : JSON.stringify(loginData),
+            })
+
+            if (!response.ok) {
+                setIsLoading(false);
+                throw new Error("login after registering failed")
+            }
+
+            const loginResult = await loginResponse.json()
+
+            // Contacts are done separately because of the oneToMany
+            // relation done in the backend.
+            // this revision takes in mind that the backend returns the id
+            // of the user in the POST response.
+
+            // Individually adds each contact
             for (let i = 0; i < contacts.length; i++) {
-                console.log(contactData.contacts[i])
+                console.log(contacts[i])
                 const contactResponse = await fetch(`${URL}/contacts/${result.mess}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${loginResult}`,
                     },
-                    body: JSON.stringify(contactData.contacts[i]),
+                    body: JSON.stringify(contacts[i]),
                 });
 
                 if (!contactResponse.ok) {
@@ -170,7 +188,8 @@ export default function Register() {
                 console.log('Success:', contactResponse);
             }
 
-            // Send to login page
+            // Send to login page and delete cookie used for posting contacts
+            deleteCookie("token");
             router.push('/login');
 
         } catch (error) {

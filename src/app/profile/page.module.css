@@ -150,6 +150,18 @@ a.secondary {
   text-align: center;
 }
 
+
+.button {
+  background: var(--foreground);
+  padding: 8px 16px;
+  border-color: var(--gray-alpha-100);
+  border-radius: 4px;
+  color: white;
+  margin-top: 8px;
+  margin-right: 8px;
+  font-size: 20px;
+  text-align: center;
+}
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   a.primary:hover {
