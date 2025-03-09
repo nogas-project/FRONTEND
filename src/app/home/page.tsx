@@ -8,6 +8,7 @@ import {validateToken} from "../../../lib/auth.lib";
 import ClipLoader from "react-spinners/ClipLoader";
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 export default function Home() {
+    const URL = process.env.BE_URL;
     let token: any;
     let userId: any;
     let [loading1, setLoading1] = useState(false);
@@ -36,7 +37,7 @@ export default function Home() {
         if (token) {
             const decoded = await validateToken(token);
             userId = decoded.id
-            const response = await fetch(`http://localhost:3001/latest/${userId}`, {
+            const response = await fetch(`${URL}/latest/${userId}`, {
                 method: "GET",
                 headers: {
                     contentType: "application/json",
@@ -57,7 +58,7 @@ export default function Home() {
             const decoded = await validateToken(token);
             userId = decoded.id
 
-            const response = await fetch(`http://localhost:3001/history/${userId}`, {
+            const response = await fetch(`${URL}/history/${userId}`, {
                 method: "GET",
                 headers: {
                     contentType: "application/json",
@@ -81,7 +82,7 @@ export default function Home() {
             // @ts-ignore
             userId = decoded.id
 
-            const response = await fetch(`http://localhost:3001/sendEmail/${userId}`, {
+            const response = await fetch(`${URL}/sendEmail/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import {deleteCookie} from "cookies-next";
 
 export default function Register() {
+    const URL = process.env.BE_URL || "http://localhost:3001";
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -123,7 +124,7 @@ export default function Register() {
         setIsLoading(true);
         try {
             console.log("Trying to reach BE...")
-            const response = await fetch(`http://localhost:${port}/auth/register`, {
+            const response = await fetch(`${URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +173,7 @@ export default function Register() {
             // Individually adds each contact
             for (let i = 0; i < contacts.length; i++) {
                 console.log(contacts[i])
-                const contactResponse = await fetch(`http://localhost:${port}/contacts/${result.mess}`, {
+                const contactResponse = await fetch(`${URL}/contacts/${result.mess}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

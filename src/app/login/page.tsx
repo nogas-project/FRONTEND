@@ -5,7 +5,10 @@ import {useRouter} from "next/navigation";
 import {setCookie} from "cookies-next";
 
 export default function Login() {
+    const URL = process.env.BE_URL;
     const router = useRouter();
+
+
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -47,8 +50,8 @@ export default function Login() {
 
         const port = process.env.BE_PORT || 3001;
         try {
-            console.log(JSON.stringify(data));
-            const response = await fetch(`http://localhost:${port}/auth/login`, {
+            console.log(JSON.stringify(data) + URL);
+            const response = await fetch(`${URL}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
