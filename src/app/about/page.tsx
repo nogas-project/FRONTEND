@@ -2,8 +2,20 @@
 import styles from "./page.module.css";
 import {Navbar} from "../../../components/navbar";
 import {getTokenFromCookie} from "../../../lib/auth.lib";
+import {useEffect, useState} from "react";
 
 export default function About() {
+
+	// Fix Hydration error
+	const [isMounted, setIsMounted] = useState(false);
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
+	if (!isMounted) {
+		return null;
+	}
 
 	// Only shows navbar if connected
 	return (
