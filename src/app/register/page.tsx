@@ -124,7 +124,7 @@ export default function Register() {
         setIsLoading(true);
         try {
             console.log("Trying to reach BE...")
-            const response = await fetch(`${URL}/auth/register`, {
+            const response = await fetch(`http://localhost:3001/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -135,9 +135,11 @@ export default function Register() {
             if (!response.ok) {
                 setIsLoading(false);
                 let feedback = await response.json()
-                if (feedback === "Email already exists") {
+                console.log(feedback)
+                if (feedback === "An account with this email already exists") {
                     setEmailError("An account with this email already exists, please use another email");
-                    throw new Error("Email exists")
+                    setServerError("");
+                    return;
                 } else {
                     throw new Error("BE is down");
                 }
