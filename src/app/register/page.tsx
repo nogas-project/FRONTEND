@@ -134,9 +134,9 @@ export default function Register() {
             if (!response.ok) {
                 setIsLoading(false);
                 let feedback = await response.json()
-                if (feedback === "Email already exists") {
+                if (feedback === "An account with this email already exists") {
                     setEmailError("An account with this email already exists, please use another email");
-                    throw new Error("Email exists")
+                    return;
                 } else {
                     throw new Error("BE is down");
                 }
