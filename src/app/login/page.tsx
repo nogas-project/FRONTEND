@@ -111,7 +111,7 @@ export default function Login() {
             </main>
             <footer className={styles.footer}>Don't have an account?
                 <a
-                    className={'font-bold '}
+                    className={`${styles.link} font-bold`}
                     href={'/register'}
                 >
                     Sign up here.

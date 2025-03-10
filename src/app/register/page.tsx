@@ -5,10 +5,9 @@ import {useRouter} from "next/navigation";
 import {deleteCookie} from "cookies-next";
 
 export default function Register() {
-    const URL = process.env.BE_URL;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-
+    const URL = process.env.BE_URL;
     // Input data
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -134,7 +133,8 @@ export default function Register() {
 
             if (!response.ok) {
                 setIsLoading(false);
-                let feedback = await response.json()
+                let feedback = await response.json();
+                console.log(feedback);
                 if (feedback === "An account with this email already exists") {
                     setEmailError("An account with this email already exists, please use another email");
                     return;
