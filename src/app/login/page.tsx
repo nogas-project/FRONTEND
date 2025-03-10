@@ -6,7 +6,7 @@ import {setCookie} from "cookies-next";
 
 export default function Login() {
     const router = useRouter();
-
+    const URL = process.env.BE_URL;
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -45,10 +45,9 @@ export default function Login() {
             password: password,
         };
 
-        const port = process.env.BE_PORT || 3001;
         try {
             console.log(JSON.stringify(data));
-            const response = await fetch(`http://localhost:${port}/auth/login`, {
+            const response = await fetch(`${URL}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

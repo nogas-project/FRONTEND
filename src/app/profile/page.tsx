@@ -10,7 +10,7 @@ import {Navbar} from "../../../components/navbar";
 export default function Profile() {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false)
-
+    const URL = process.env.BE_URL;
     let userId: any;
     let token: any;
     const port = process.env.BE_PORT || 3001;
@@ -29,7 +29,7 @@ export default function Profile() {
             const decodedData = await validateToken(token);
             userId = decodedData.id
 
-            const response = await fetch(`http://localhost:${port}/user/${userId}`, {
+            const response = await fetch(`${URL}/user/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export default function Profile() {
 
     async function loadContactsData() {
         try {
-            const response = await fetch(`http://localhost:3001/contacts/${userId}`, {
+            const response = await fetch(`${URL}/contacts/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
